@@ -53,10 +53,6 @@ Read the `SKILL.md` files to understand the methodology, then adapt to your agen
 - LLM reasoning — The agent's own model
 - **Optional:** Gemini API key (free tier) for grounded analytics
 
-## About
-
-Built by [Clearscope](https://clearscope.io) — helping content rank in search engines since 2018, now helping it get cited by AI.
-
 ## License
 
 MIT
