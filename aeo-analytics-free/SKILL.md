@@ -14,6 +14,9 @@ description: >
 
 # AEO Analytics (Free)
 
+> **Source:** [github.com/psyduckler/aeo-skills](https://github.com/psyduckler/aeo-skills/tree/main/aeo-analytics-free)
+> **Part of:** [AEO Skills Suite](https://github.com/psyduckler/aeo-skills) — [Prompt Research](https://github.com/psyduckler/aeo-skills/tree/main/aeo-prompt-research-free) → [Content](https://github.com/psyduckler/aeo-skills/tree/main/aeo-content-free) → Analytics
+
 Track whether AI assistants mention and cite your brand — and how that changes over time.
 
 ## Requirements

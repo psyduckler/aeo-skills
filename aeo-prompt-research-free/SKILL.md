@@ -12,6 +12,9 @@ description: >
 
 # AEO Prompt Research (Free)
 
+> **Source:** [github.com/psyduckler/aeo-skills](https://github.com/psyduckler/aeo-skills/tree/main/aeo-prompt-research-free)
+> **Part of:** [AEO Skills Suite](https://github.com/psyduckler/aeo-skills) — Prompt Research → [Content](https://github.com/psyduckler/aeo-skills/tree/main/aeo-content-free) → [Analytics](https://github.com/psyduckler/aeo-skills/tree/main/aeo-analytics-free)
+
 Discover which prompts and topics matter for a brand's AI visibility — using zero paid APIs.
 
 ## Requirements

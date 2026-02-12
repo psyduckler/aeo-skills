@@ -15,6 +15,9 @@ description: >
 
 # AEO Content Skill (Free)
 
+> **Source:** [github.com/psyduckler/aeo-skills](https://github.com/psyduckler/aeo-skills/tree/main/aeo-content-free)
+> **Part of:** [AEO Skills Suite](https://github.com/psyduckler/aeo-skills) — [Prompt Research](https://github.com/psyduckler/aeo-skills/tree/main/aeo-prompt-research-free) → Content → [Analytics](https://github.com/psyduckler/aeo-skills/tree/main/aeo-analytics-free)
+
 Create or refresh content that AI assistants want to cite — using zero paid APIs.
 
 ## Requirements
