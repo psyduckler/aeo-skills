@@ -11,6 +11,8 @@ No paid APIs required. These skills use web search, web scraping, and LLM reason
 | **aeo-prompt-research-free** | Discover which AI prompts matter for a brand. Crawls a site, analyzes positioning, generates prioritized prompts, and audits content coverage. | [→ Skill](./aeo-prompt-research-free/) |
 | **aeo-content-free** | Create or refresh content that AI assistants want to cite. Researches what models currently cite, builds a competitive brief, and produces citation-worthy content. | [→ Skill](./aeo-content-free/) |
 | **aeo-analytics-free** | Track whether AI assistants mention and cite a brand over time. Measures visibility, detects trends, and identifies opportunities. | [→ Skill](./aeo-analytics-free/) |
+| **prompt-question-finder** | Find question-based Google Autocomplete suggestions for any topic. Prepends 13 question modifiers (what, how, why, will, are, do…) to discover what people actually ask. | [→ Skill](./prompt-question-finder/) |
+| **prompt-frequency-analyzer** | Analyze which search queries Gemini triggers when answering a prompt, by running it multiple times with Google Search grounding and reporting frequency distribution. | [→ Skill](./prompt-frequency-analyzer/) |
 
 ## The AEO Loop
 
