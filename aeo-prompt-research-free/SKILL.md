@@ -17,13 +17,18 @@ description: >
 
 Discover which prompts and topics matter for a brand's AI visibility — using zero paid APIs.
 
+## Context: Why This Matters Now
+
+Google's AI Overviews and Search AI Mode — powered by **Gemini 3 Flash** — now handle a significant share of search queries. These AI-generated answers cite specific sources, creating a new competitive landscape. This skill identifies the prompts where your brand should be cited and audits your current coverage.
+
 ## Requirements
 
 - `web_fetch` — crawl the target site
 - `web_search` — Brave Search free tier (optional but recommended)
 - LLM reasoning — the agent's own model does the heavy lifting
+- **Optional:** Gemini API key (free) — use `gemini-3-flash-preview` with grounding to validate which prompts currently cite your brand (20 samples per prompt for reliable signal)
 
-No API keys, no paid tools, no accounts needed.
+No paid tools or accounts required for core functionality.
 
 ## Workflow
 
@@ -116,3 +121,4 @@ Use the output format from `references/aeo-methodology.md`.
 - For competitor analysis, crawl competitor sites too and compare topic coverage
 - Re-run quarterly — AI prompt trends shift as models and user behavior evolve
 - The agent's own knowledge of the industry is a valid research input — use it
+- **Validate with Gemini 3 Flash:** After generating prompts, run Tier 1 prompts through `gemini-3-flash-preview` with Google Search grounding (20 samples each) to see which sources currently get cited. This tells you who you're competing against in Google's AI Overviews

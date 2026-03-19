@@ -20,11 +20,16 @@ description: >
 
 Create or refresh content that AI assistants want to cite — using zero paid APIs.
 
+## Context: Why This Matters Now
+
+Google's AI Overviews and Search AI Mode are powered by **Gemini 3 Flash** — the model that decides which sources get cited when users ask questions. Understanding what this model looks for in content is the key to AEO success. This skill creates content optimized for citation by AI models, with particular focus on the signals Gemini 3 Flash prioritizes when selecting grounding sources.
+
 ## Requirements
 
 - `web_fetch` — analyze currently-cited sources and existing content
 - `web_search` — find competing content (Brave free tier, optional)
 - LLM reasoning — research, brief, draft, and evaluate
+- **Optional:** Gemini API key (free) — use `gemini-3-flash-preview` with grounding to directly test what the model cites for your target prompt before and after content creation (20 samples recommended for reliable signal)
 
 ## Mode Detection
 

@@ -25,6 +25,11 @@ Track whether AI assistants mention and cite your brand — and how that changes
 - **Fallback:** `web_search` only — weaker signal but zero API keys needed
 - `web_fetch` — optional, for deeper analysis of cited pages
 
+## Defaults
+
+- **Model:** `gemini-3-flash-preview` — This is the model powering Google Search AI Mode and AI Overviews, making it the most relevant model for AEO analytics. Using the same model Google uses means your measurements reflect real-world AI Overview behavior.
+- **Samples per prompt:** 20 — Run each prompt 20 times to get reliable directional data. AI responses are probabilistic; a single run can miss mentions that appear 30-40% of the time. 20 samples balances accuracy with API cost.
+
 ## Input
 
 - **Domain** (required) — the brand's website (e.g., `tabiji.ai`)
@@ -59,13 +64,14 @@ See `references/data-schema.md` for the full JSON schema.
 
 ### Step 2: Run Prompts
 
-For each tracked prompt:
+For each tracked prompt, run 20 samples to get reliable frequency data:
 
 **Method A — Gemini API with grounding (preferred):**
 See `references/gemini-grounding.md` for API details.
+Use model `gemini-3-flash-preview` (the same model powering Google AI Overviews).
 
-1. Send prompt to Gemini API with `googleSearch` tool enabled
-2. From the response, extract:
+1. Send prompt to Gemini API with `googleSearch` tool enabled — run 20 times per prompt
+2. From each response, extract:
    - **Response text** — the AI's answer
    - **Grounding chunks** — the web sources cited (URLs + titles)
    - **Web search queries** — what the AI searched for
@@ -160,6 +166,6 @@ NEXT ACTIONS
 
 - Run scans at consistent intervals (weekly or biweekly) for meaningful trend data
 - After publishing new AEO content, wait 2-4 weeks for indexing before expecting changes
-- Gemini's grounding results can vary run-to-run — that's normal. Aggregate data over multiple scans is more reliable than any single result
-- Track 10-20 prompts max for a focused view. Too many dilutes the signal
+- Gemini's grounding results can vary run-to-run — that's normal and exactly why we run 20 samples per prompt. Aggregate data over multiple samples and scans is more reliable than any single result
+- Track 10-20 prompts max for a focused view. Too many dilutes the signal (20 prompts × 20 samples = 400 API calls per scan)
 - This skill completes the AEO loop: Research (aeo-prompt-research-free) → Create/Refresh (aeo-content-free) → Measure (this skill) → repeat

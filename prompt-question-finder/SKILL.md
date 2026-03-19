@@ -1,5 +1,5 @@
 ---
-name: prompt-question-finder
+name: aeo-prompt-question-finder
 description: Find question-based Google Autocomplete suggestions for any topic. Prepends question modifiers (what, how, why) to a seed topic and returns real autocomplete suggestions — useful for AEO prompt research, content ideation, and understanding what people ask about a topic. Use when the user wants to discover questions people search for, find content angles, or do keyword/prompt research for a topic.
 ---
 

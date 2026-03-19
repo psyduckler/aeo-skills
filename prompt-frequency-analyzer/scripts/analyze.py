@@ -4,7 +4,7 @@ Prompt Frequency Analyzer — Run a prompt N times against Gemini with Google Se
 grounding and report search query frequencies.
 
 Usage:
-    python3 analyze.py "your prompt here" [--runs 10] [--model gemini-2.5-pro] [--concurrency 5] [--output json|text]
+    python3 analyze.py "your prompt here" [--runs 20] [--model gemini-3-flash-preview] [--concurrency 5] [--output json|text]
 
 Requires: GEMINI_API_KEY env var
 """
@@ -164,8 +164,8 @@ def format_text(result: dict) -> str:
 def main():
     parser = argparse.ArgumentParser(description="Analyze Gemini search query frequency for a prompt")
     parser.add_argument("prompt", help="The prompt to analyze")
-    parser.add_argument("--runs", type=int, default=10, help="Number of runs (default: 10)")
-    parser.add_argument("--model", default="gemini-2.5-pro", help="Gemini model (default: gemini-2.5-pro)")
+    parser.add_argument("--runs", type=int, default=20, help="Number of runs (default: 20)")
+    parser.add_argument("--model", default="gemini-3-flash-preview", help="Gemini model (default: gemini-3-flash-preview)")
     parser.add_argument("--concurrency", type=int, default=5, help="Max concurrent requests (default: 5)")
     parser.add_argument("--output", choices=["json", "text"], default="text", help="Output format")
     args = parser.parse_args()
