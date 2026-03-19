@@ -83,22 +83,36 @@ Improve your content's AI-readiness.
 |-------|-------------|------|
 | **aeo-schema-optimizer** | Analyze pages and generate structured data (JSON-LD) optimized for AI citation. Includes templates for Article, FAQ, HowTo, Product, LocalBusiness, and BreadcrumbList. | [→ Skill](./aeo-schema-optimizer/) |
 
+### Advanced Strategy
+
+Deep analysis for competitive AEO.
+
+| Skill | Description | Link |
+|-------|-------------|------|
+| **aeo-source-authority-profiler** | Analyze why certain sources get cited. Fetches top-cited pages and profiles them (word count, schema, freshness, entities) to build a "citation blueprint." | [→ Skill](./aeo-source-authority-profiler/) |
+| **aeo-cannibalization-detector** | Detect when your own pages compete against each other for the same AI prompts. Scores severity and recommends consolidation or differentiation. | [→ Skill](./aeo-cannibalization-detector/) |
+| **aeo-freshness-decay-tracker** | Track how citation rates change over time. Detects content decay, correlates with freshness, and flags pages needing urgent refresh. | [→ Skill](./aeo-freshness-decay-tracker/) |
+| **aeo-entity-extractor** | Extract the specific entities (brands, people, stats, tools) that Gemini mentions in responses. Find entity gaps in your content. | [→ Skill](./aeo-entity-extractor/) |
+| **aeo-multi-prompt-strategy** | Find authority hub pages cited across multiple prompts. Optimize one page to win many prompts instead of building separate pages for each. | [→ Skill](./aeo-multi-prompt-strategy/) |
+
 ## The AEO Loop
 
 These skills form a complete AEO workflow:
 
 ```
-1. RESEARCH  →  2. CREATE/REFRESH  →  3. MEASURE  →  (repeat)
-     ↑                                      |
-     └──────────────────────────────────────┘
+1. RESEARCH  →  2. CREATE/REFRESH  →  3. MEASURE  →  4. STRATEGIZE  →  (repeat)
+     ↑                                                       |
+     └───────────────────────────────────────────────────────┘
 ```
 
 1. **Research** (`aeo-prompt-research-free`) — Find what questions people ask AI about your industry
 2. **Analyze** (`prompt-frequency-analyzer`, `aeo-grounding-query-mapper`, `prompt-question-finder`) — Understand how AI models search and what they cite
 3. **Create** (`aeo-content-free`, `aeo-schema-optimizer`) — Write content and add structured data optimized for AI citations
 4. **Simulate** (`aeo-ai-overview-simulator`, `aeo-citation-gap-finder`) — Preview how your content performs in AI Overviews
-5. **Measure** (`aeo-analytics-free`, `aeo-competitor-monitor`) — Track your visibility and competitors over time
-6. **Repeat** — Use measurement data to refine your strategy
+5. **Measure** (`aeo-analytics-free`, `aeo-competitor-monitor`, `aeo-freshness-decay-tracker`) — Track your visibility, competitors, and content decay over time
+6. **Profile** (`aeo-source-authority-profiler`, `aeo-entity-extractor`) — Understand WHY top sources get cited and what entities to include
+7. **Strategize** (`aeo-multi-prompt-strategy`, `aeo-cannibalization-detector`) — Find authority hub opportunities and fix self-competition
+8. **Repeat** — Use strategy insights to prioritize research and content creation
 
 ## Usage
 
@@ -116,6 +130,11 @@ clawhub install clearscope/aeo-citation-gap-finder
 clawhub install clearscope/aeo-grounding-query-mapper
 clawhub install clearscope/aeo-competitor-monitor
 clawhub install clearscope/aeo-schema-optimizer
+clawhub install clearscope/aeo-source-authority-profiler
+clawhub install clearscope/aeo-cannibalization-detector
+clawhub install clearscope/aeo-freshness-decay-tracker
+clawhub install clearscope/aeo-entity-extractor
+clawhub install clearscope/aeo-multi-prompt-strategy
 ```
 
 ### Other Frameworks
