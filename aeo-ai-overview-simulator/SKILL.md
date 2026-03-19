@@ -20,6 +20,8 @@ Simulate Google AI Overviews by running prompts through the same model that powe
 
 Google's AI Overviews and Search AI Mode are powered by Gemini 3 Flash (`gemini-3-flash-preview`). When you run a prompt through this model with `google_search` grounding enabled, you're simulating exactly what happens when a user triggers an AI Overview in Google Search. The model searches the web, selects sources, and generates a grounded answer — the same pipeline Google uses.
 
+[Influence happens at retrieval, not inside the model.](https://www.clearscope.io/blog/how-to-influence-ai-answers) You can't edit training data, but you can enter the "candidate set" the model selects from when it searches. [Gemini is search-first](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — it searches before nearly every answer, making it more influenceable than GPT. This simulator reveals the **recurring retrieval set** — the sources, themes, and response patterns the model consistently draws from.
+
 Running 20 samples per prompt captures the probabilistic nature of AI responses. A source cited in 15/20 runs is reliably featured; one cited in 3/20 is marginal. This frequency data is far more actionable than a single snapshot.
 
 ## Requirements
@@ -38,6 +40,10 @@ GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
 # Track a specific domain
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
   python3 scripts/simulate.py "best project management tools for startups" --domain monday.com
+
+# With response text diffing — see stable core vs volatile insertion points
+GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
+  python3 scripts/simulate.py "best project management tools for startups" --domain monday.com --diff
 
 # More runs for higher confidence
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
@@ -60,6 +66,7 @@ Run from the skill directory. Resolve `scripts/simulate.py` relative to this SKI
 | `--model` | `gemini-3-flash-preview` | Gemini model to use |
 | `--concurrency` | 5 | Max parallel API calls (keep ≤5 to avoid rate limits) |
 | `--output` | `text` | Output format: `text` or `json` |
+| `--diff` | off | Enable response text diffing — analyze sentence stability across runs |
 
 ## Output
 
@@ -100,6 +107,42 @@ Domain Tracking: monday.com
 
 Structured JSON with `sources`, `queries`, `domain_tracking`, and per-run detail.
 
+## Response Text Diffing (`--diff`)
+
+When `--diff` is enabled, the simulator analyzes the response text across all runs to reveal the **stable core vs volatile periphery** of the recurring retrieval set:
+
+- **Stable sentences (>80%)** — appear in almost every run. These form the core of the AI Overview and are hard to displace. They're backed by entrenched sources in the recurring retrieval set.
+- **Common sentences (40-80%)** — usually included but not locked in. These are the mid-tier — present more often than not.
+- **Volatile sentences (10-40%)** — the **insertion points** where your content can have impact. These sentences change between runs because the model is choosing between competing sources. Create content that wins these competitive slots.
+- **Rare sentences (<10%)** — edge cases the model occasionally surfaces. Low priority.
+- **Entity volatility** — brands, tools, and domains that appear inconsistently. These are **competitive slots** — the model is undecided about which entity to feature, meaning your brand can compete for these mentions.
+
+### Text Output with `--diff`
+
+```
+Response Stability Analysis:
+============================================================
+
+Stable (>80% of runs — core of the AI Overview, hard to displace):
+  [95%] Project management tools help startups organize tasks and track progress...
+  [90%] Key features to look for include task management, collaboration, and...
+
+Volatile (10-40% — insertion points, your content can influence these):
+  [35%] For bootstrapped startups, free tiers from tools like ClickUp offer...
+  [25%] Integration with existing tools like Slack and Google Workspace is...
+
+Entity Volatility (brands/entities that appear inconsistently — competitive slots):
+  [40%] ClickUp (8/20 runs)
+  [30%] Basecamp (6/20 runs)
+  [20%] Linear (4/20 runs)
+```
+
+### JSON Output with `--diff`
+
+Adds a `response_analysis` object with `stable_sentences`, `common_sentences`, `volatile_sentences`, `rare_sentences`, and `entity_frequency` arrays.
+
+**Note:** `--diff` adds processing time since it compares sentences across all runs. Off by default.
+
 ## How It Works
 
 1. Sends the prompt to Gemini 3 Flash with `google_search` grounding tool enabled
@@ -126,6 +169,11 @@ Structured JSON with `sources`, `queries`, `domain_tracking`, and per-run detail
 - Use `--output json` to feed results into other AEO skills (analytics, gap finder)
 - Pair with `aeo-content-free` to improve content that isn't getting cited
 - Pair with `aeo-analytics-free` to track citation rates over time
+
+## Further Reading
+
+- [How to Influence AI Answers](https://www.clearscope.io/blog/how-to-influence-ai-answers) — the retrieval-first framework for AEO
+- [Gemini Creates More Opportunity; GPT Is Harder to Influence](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — why Gemini's search-first behavior matters
 
 ## Notes
 

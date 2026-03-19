@@ -24,6 +24,55 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
+# ── Intent Classification ───────────────────────────────────────────────────
+
+def classify_intent(query: str) -> str:
+    """Classify search query intent using keyword/pattern matching.
+
+    Returns one of: informational, commercial, navigational, transactional
+    """
+    q = query.strip().lower()
+
+    # Transactional — strongest signals, check first
+    transactional_patterns = [
+        r'\bbuy\b', r'\bpurchase\b', r'\border\b', r'\bsubscribe\b',
+        r'\bdownload\b', r'\binstall\b', r'\bget started\b',
+        r'\bfree trial\b', r'\btrial\b', r'\bdiscount\b', r'\bcoupon\b',
+        r'\bpromo\b', r'\bdeal\b', r'\bpricing\b', r'\bprice\b',
+        r'\bcost\b', r'\bcheap\b', r'\baffordable\b', r'\bsign up\b',
+        r'\bregister\b', r'\bcheckout\b',
+    ]
+    for pat in transactional_patterns:
+        if re.search(pat, q):
+            return "transactional"
+
+    # Navigational — brand/domain references
+    navigational_patterns = [
+        r'\blogin\b', r'\blog in\b', r'\bsign in\b', r'\bsignin\b',
+        r'\bwebsite\b', r'\bofficial\b', r'\bhomepage\b',
+        r'\b\w+\.(com|org|net|io|ai|co|dev)\b',  # domain names
+        r'\bapp\b', r'\bportal\b', r'\bdashboard\b', r'\baccount\b',
+    ]
+    for pat in navigational_patterns:
+        if re.search(pat, q):
+            return "navigational"
+
+    # Commercial — comparison/evaluation signals
+    commercial_patterns = [
+        r'\bbest\b', r'\btop\b', r'\bvs\b', r'\bversus\b', r'\bcompare\b',
+        r'\bcomparison\b', r'\breview\b', r'\breviews\b', r'\brating\b',
+        r'\brated\b', r'\brecommend\b', r'\balternative\b', r'\balternatives\b',
+        r'\bpros and cons\b', r'\bworth it\b', r'\bshould i\b',
+        r'\bwhich\b.*\bbetter\b', r'\bbetter than\b',
+    ]
+    for pat in commercial_patterns:
+        if re.search(pat, q):
+            return "commercial"
+
+    # Informational — default / knowledge-seeking
+    return "informational"
+
+
 # ── Gemini API ──────────────────────────────────────────────────────────────
 
 def call_gemini(prompt: str, api_key: str, model: str) -> dict:
@@ -213,6 +262,20 @@ def analyze_prompt(prompt: str, runs: int, model: str, concurrency: int, api_key
     # Cluster queries
     clusters = cluster_queries(queries_with_freq)
 
+    # Intent classification
+    intent_counts = defaultdict(int)
+    queries_out = []
+    for q, c, f in queries_with_freq:
+        intent = classify_intent(q)
+        intent_counts[intent] += 1
+        queries_out.append({"query": q, "count": c, "frequency": f, "intent": intent})
+
+    total_unique = len(queries_with_freq)
+    intent_distribution = {}
+    for intent_type in ["informational", "commercial", "navigational", "transactional"]:
+        cnt = intent_counts.get(intent_type, 0)
+        intent_distribution[intent_type] = round(cnt / total_unique * 100) if total_unique else 0
+
     # Source frequency
     source_count = defaultdict(int)
     for s in all_sources:
@@ -227,10 +290,8 @@ def analyze_prompt(prompt: str, runs: int, model: str, concurrency: int, api_key
         "successful_runs": successful_runs,
         "errors": errors,
         "unique_queries": len(sorted_queries),
-        "queries": [
-            {"query": q, "count": c, "frequency": f}
-            for q, c, f in queries_with_freq
-        ],
+        "queries": queries_out,
+        "intent_distribution": intent_distribution,
         "clusters": clusters,
         "sources": [
             {"domain": d, "count": c}
@@ -306,7 +367,15 @@ def format_prompt_text(result: dict, index: int = None) -> list:
     lines.append("Query Frequency:")
     lines.append("-" * 60)
     for q in result["queries"]:
-        lines.append(f"  {q['frequency']}% ({q['count']}/{result['successful_runs']}) — {q['query']}")
+        lines.append(f"  {q['frequency']}% ({q['count']}/{result['successful_runs']}) [{q['intent']}] — {q['query']}")
+
+    if result.get("intent_distribution"):
+        lines.append("")
+        lines.append("Intent Distribution:")
+        lines.append("-" * 60)
+        dist = result["intent_distribution"]
+        parts = [f"{dist.get(k, 0)}% {k}" for k in ["informational", "commercial", "navigational", "transactional"]]
+        lines.append(f"  {', '.join(parts)}")
 
     if result["clusters"]:
         lines.append("")

@@ -12,12 +12,61 @@ Requires: GEMINI_API_KEY env var
 import argparse
 import json
 import os
+import re
 import sys
 import time
 import urllib.request
 import urllib.error
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+
+def classify_intent(query: str) -> str:
+    """Classify search query intent using keyword/pattern matching.
+
+    Returns one of: informational, commercial, navigational, transactional
+    """
+    q = query.strip().lower()
+
+    # Transactional — strongest signals, check first
+    transactional_patterns = [
+        r'\bbuy\b', r'\bpurchase\b', r'\border\b', r'\bsubscribe\b',
+        r'\bdownload\b', r'\binstall\b', r'\bget started\b',
+        r'\bfree trial\b', r'\btrial\b', r'\bdiscount\b', r'\bcoupon\b',
+        r'\bpromo\b', r'\bdeal\b', r'\bpricing\b', r'\bprice\b',
+        r'\bcost\b', r'\bcheap\b', r'\baffordable\b', r'\bsign up\b',
+        r'\bregister\b', r'\bcheckout\b',
+    ]
+    for pat in transactional_patterns:
+        if re.search(pat, q):
+            return "transactional"
+
+    # Navigational — brand/domain references
+    navigational_patterns = [
+        r'\blogin\b', r'\blog in\b', r'\bsign in\b', r'\bsignin\b',
+        r'\bwebsite\b', r'\bofficial\b', r'\bhomepage\b',
+        r'\b\w+\.(com|org|net|io|ai|co|dev)\b',  # domain names
+        r'\bapp\b', r'\bportal\b', r'\bdashboard\b', r'\baccount\b',
+    ]
+    for pat in navigational_patterns:
+        if re.search(pat, q):
+            return "navigational"
+
+    # Commercial — comparison/evaluation signals
+    commercial_patterns = [
+        r'\bbest\b', r'\btop\b', r'\bvs\b', r'\bversus\b', r'\bcompare\b',
+        r'\bcomparison\b', r'\breview\b', r'\breviews\b', r'\brating\b',
+        r'\brated\b', r'\brecommend\b', r'\balternative\b', r'\balternatives\b',
+        r'\bpros and cons\b', r'\bworth it\b', r'\bshould i\b',
+        r'\bwhich\b.*\bbetter\b', r'\bbetter than\b',
+    ]
+    for pat in commercial_patterns:
+        if re.search(pat, q):
+            return "commercial"
+
+    # Informational — default / knowledge-seeking
+    # Also matches explicit info patterns, but we return informational as default anyway
+    return "informational"
 
 
 def call_gemini(prompt: str, api_key: str, model: str) -> dict:
@@ -119,6 +168,26 @@ def run_analysis(prompt: str, runs: int, model: str, concurrency: int):
         source_count[domain] += 1
     sorted_sources = sorted(source_count.items(), key=lambda x: (-x[1], x[0]))
 
+    # Build queries with intent classification
+    queries_out = []
+    intent_counts = defaultdict(int)
+    for q, c in sorted_queries:
+        intent = classify_intent(q)
+        intent_counts[intent] += 1
+        queries_out.append({
+            "query": q,
+            "count": c,
+            "frequency": round(c / successful_runs * 100) if successful_runs else 0,
+            "intent": intent,
+        })
+
+    # Intent distribution as percentages
+    total_unique = len(sorted_queries)
+    intent_distribution = {}
+    for intent_type in ["informational", "commercial", "navigational", "transactional"]:
+        cnt = intent_counts.get(intent_type, 0)
+        intent_distribution[intent_type] = round(cnt / total_unique * 100) if total_unique else 0
+
     return {
         "prompt": prompt,
         "model": model,
@@ -126,14 +195,8 @@ def run_analysis(prompt: str, runs: int, model: str, concurrency: int):
         "successful_runs": successful_runs,
         "errors": errors,
         "unique_queries": len(sorted_queries),
-        "queries": [
-            {
-                "query": q,
-                "count": c,
-                "frequency": round(c / successful_runs * 100) if successful_runs else 0,
-            }
-            for q, c in sorted_queries
-        ],
+        "queries": queries_out,
+        "intent_distribution": intent_distribution,
         "sources": [
             {"domain": d, "count": c}
             for d, c in sorted_sources[:20]
@@ -151,7 +214,14 @@ def format_text(result: dict) -> str:
     lines.append("Search Query Frequency:")
     lines.append("=" * 60)
     for q in result["queries"]:
-        lines.append(f"  {q['frequency']}% ({q['count']}/{result['successful_runs']}) — {q['query']}")
+        lines.append(f"  {q['frequency']}% ({q['count']}/{result['successful_runs']}) [{q['intent']}] — {q['query']}")
+    if result.get("intent_distribution"):
+        lines.append("")
+        lines.append("Intent Distribution:")
+        lines.append("=" * 60)
+        dist = result["intent_distribution"]
+        parts = [f"{dist.get(k, 0)}% {k}" for k in ["informational", "commercial", "navigational", "transactional"]]
+        lines.append(f"  {', '.join(parts)}")
     if result["sources"]:
         lines.append("")
         lines.append("Top Sources Referenced:")

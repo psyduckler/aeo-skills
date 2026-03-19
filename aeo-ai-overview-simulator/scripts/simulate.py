@@ -130,7 +130,151 @@ def check_domain_mention(text: str, domain: str) -> list:
     return excerpts
 
 
-def run_simulation(prompt: str, runs: int, model: str, concurrency: int, domain: str = None):
+def normalize_sentence(s: str) -> str:
+    """Normalize a sentence for comparison: lowercase, strip punctuation, collapse whitespace."""
+    s = s.lower()
+    s = re.sub(r'[^\w\s]', '', s)
+    s = re.sub(r'\s+', ' ', s).strip()
+    return s
+
+
+def tokenize_words(s: str) -> set:
+    """Extract word set from normalized text."""
+    return set(s.split())
+
+
+def sentences_similar(a: str, b: str, threshold: float = 0.8) -> bool:
+    """Check if two sentences are similar (>80% word overlap)."""
+    a_norm = normalize_sentence(a)
+    b_norm = normalize_sentence(b)
+    if a_norm == b_norm:
+        return True
+    words_a = tokenize_words(a_norm)
+    words_b = tokenize_words(b_norm)
+    if not words_a or not words_b:
+        return False
+    overlap = len(words_a & words_b)
+    max_len = max(len(words_a), len(words_b))
+    return (overlap / max_len) >= threshold
+
+
+def analyze_response_diff(run_results: list) -> dict:
+    """Analyze response text stability across runs.
+
+    Groups similar sentences and classifies them by frequency:
+    - Stable (>80%): always included
+    - Common (40-80%): usually included
+    - Volatile (10-40%): sometimes mentioned
+    - Rare (<10%): edge case mentions
+    """
+    successful_runs = len(run_results)
+    if successful_runs == 0:
+        return {}
+
+    # Split each response into sentences
+    all_run_sentences = []
+    for run in run_results:
+        text = run.get("text", "")
+        # Split on sentence boundaries
+        sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', text) if s.strip()]
+        all_run_sentences.append(sentences)
+
+    # Group similar sentences across runs
+    # Each group: {"canonical": str, "count": int, "variants": list}
+    sentence_groups = []
+    for run_idx, sentences in enumerate(all_run_sentences):
+        for sentence in sentences:
+            if len(sentence) < 10:  # skip tiny fragments
+                continue
+            # Try to match to an existing group
+            matched = False
+            for group in sentence_groups:
+                if sentences_similar(sentence, group["canonical"]):
+                    if run_idx not in group["run_indices"]:
+                        group["count"] += 1
+                        group["run_indices"].add(run_idx)
+                    if sentence != group["canonical"] and sentence not in group["variants"]:
+                        group["variants"].append(sentence)
+                    matched = True
+                    break
+            if not matched:
+                sentence_groups.append({
+                    "canonical": sentence,
+                    "count": 1,
+                    "run_indices": {run_idx},
+                    "variants": [],
+                })
+
+    # Classify by frequency
+    stable = []  # >80%
+    common = []  # 40-80%
+    volatile = []  # 10-40%
+    rare = []  # <10%
+
+    for group in sentence_groups:
+        freq = round(group["count"] / successful_runs * 100)
+        entry = {
+            "sentence": group["canonical"],
+            "frequency": freq,
+            "count": group["count"],
+        }
+        if freq > 80:
+            stable.append(entry)
+        elif freq >= 40:
+            common.append(entry)
+        elif freq >= 10:
+            volatile.append(entry)
+        else:
+            rare.append(entry)
+
+    # Sort each category by frequency desc
+    for lst in [stable, common, volatile, rare]:
+        lst.sort(key=lambda x: -x["frequency"])
+
+    # Entity frequency — extract capitalized multi-word names and domains
+    entity_counts = defaultdict(int)
+    entity_run_presence = defaultdict(set)
+    entity_pattern = re.compile(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b')
+    domain_pattern = re.compile(r'\b([a-zA-Z0-9][-a-zA-Z0-9]*\.(?:com|org|net|io|ai|co|dev))\b')
+
+    for run_idx, run in enumerate(run_results):
+        text = run.get("text", "")
+        # Named entities
+        for match in entity_pattern.finditer(text):
+            name = match.group(1)
+            if len(name) > 2:  # skip short matches
+                entity_counts[name] += 1
+                entity_run_presence[name].add(run_idx)
+        # Domains
+        for match in domain_pattern.finditer(text):
+            domain = match.group(1).lower()
+            entity_counts[domain] += 1
+            entity_run_presence[domain].add(run_idx)
+
+    entity_frequency = []
+    for entity, count in sorted(entity_counts.items(), key=lambda x: -x[1]):
+        run_count = len(entity_run_presence[entity])
+        freq = round(run_count / successful_runs * 100)
+        if freq < 100:  # skip entities that appear in every run (likely generic words)
+            entity_frequency.append({
+                "entity": entity,
+                "frequency": freq,
+                "run_count": run_count,
+            })
+
+    # Keep top 20 volatile entities (not in every run)
+    volatile_entities = [e for e in entity_frequency if e["frequency"] < 80][:20]
+
+    return {
+        "stable_sentences": stable[:15],
+        "common_sentences": common[:15],
+        "volatile_sentences": volatile[:15],
+        "rare_sentences": rare[:10],
+        "entity_frequency": volatile_entities,
+    }
+
+
+def run_simulation(prompt: str, runs: int, model: str, concurrency: int, domain: str = None, diff: bool = False):
     """Run prompt N times and collect AI Overview simulation data."""
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
@@ -245,6 +389,12 @@ def run_simulation(prompt: str, runs: int, model: str, concurrency: int, domain:
             "excerpts": unique_excerpts,
         }
 
+    # Response diff analysis (if enabled)
+    response_analysis = None
+    if diff and run_results:
+        print(f"\nAnalyzing response stability...", file=sys.stderr)
+        response_analysis = analyze_response_diff(run_results)
+
     result = {
         "prompt": prompt,
         "model": model,
@@ -269,6 +419,7 @@ def run_simulation(prompt: str, runs: int, model: str, concurrency: int, domain:
             for q, c in sorted_queries
         ],
         "domain_tracking": domain_tracking,
+        "response_analysis": response_analysis,
     }
 
     return result
@@ -314,6 +465,37 @@ def format_text(result: dict) -> str:
             for ex in dt["excerpts"][:5]:
                 lines.append(f"    - \"{ex}\"")
 
+    # Response stability analysis
+    ra = result.get("response_analysis")
+    if ra:
+        lines.append("")
+        lines.append("Response Stability Analysis:")
+        lines.append("=" * 60)
+
+        if ra.get("stable_sentences"):
+            lines.append("")
+            lines.append("Stable (>80% of runs — core of the AI Overview, hard to displace):")
+            for s in ra["stable_sentences"][:10]:
+                lines.append(f"  [{s['frequency']}%] {s['sentence'][:120]}{'...' if len(s['sentence']) > 120 else ''}")
+
+        if ra.get("common_sentences"):
+            lines.append("")
+            lines.append("Common (40-80% — usually included):")
+            for s in ra["common_sentences"][:8]:
+                lines.append(f"  [{s['frequency']}%] {s['sentence'][:120]}{'...' if len(s['sentence']) > 120 else ''}")
+
+        if ra.get("volatile_sentences"):
+            lines.append("")
+            lines.append("Volatile (10-40% — insertion points, your content can influence these):")
+            for s in ra["volatile_sentences"][:8]:
+                lines.append(f"  [{s['frequency']}%] {s['sentence'][:120]}{'...' if len(s['sentence']) > 120 else ''}")
+
+        if ra.get("entity_frequency"):
+            lines.append("")
+            lines.append("Entity Volatility (brands/entities that appear inconsistently — competitive slots):")
+            for e in ra["entity_frequency"][:10]:
+                lines.append(f"  [{e['frequency']}%] {e['entity']} ({e['run_count']}/{result['successful_runs']} runs)")
+
     return "\n".join(lines)
 
 
@@ -330,9 +512,11 @@ def main():
                         help="Max concurrent requests (default: 5)")
     parser.add_argument("--output", choices=["text", "json"], default="text",
                         help="Output format (default: text)")
+    parser.add_argument("--diff", action="store_true",
+                        help="Enable response text diffing — analyze sentence stability across runs")
     args = parser.parse_args()
 
-    result = run_simulation(args.prompt, args.runs, args.model, args.concurrency, args.domain)
+    result = run_simulation(args.prompt, args.runs, args.model, args.concurrency, args.domain, args.diff)
 
     if args.output == "json":
         print(json.dumps(result, indent=2))

@@ -19,6 +19,8 @@ description: >
 
 Track whether AI assistants mention and cite your brand — and how that changes over time.
 
+**The Retrieval Framework:** [Influence happens at retrieval, not inside the model.](https://www.clearscope.io/blog/how-to-influence-ai-answers) You can't edit a model's training data — but you can enter the "candidate set" the model selects from when it searches the web. This skill measures whether you're in that candidate set, where you sit in it (citation position), and whether your position is improving over time. [Gemini is search-first](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence), searching before nearly every answer — influence compounds through repeated inclusion in the recurring retrieval set.
+
 ## Requirements
 
 - **Primary:** Gemini API key (free from aistudio.google.com) — enables grounding with source data
@@ -81,6 +83,7 @@ Use model `gemini-3-flash-preview` (the same model powering Google AI Overviews)
    - **Mention excerpt** — Extract the sentence(s) containing the brand name
    - **Cited?** — Check if brand's domain appears in any grounding chunk URI
    - **Cited URLs** — List the specific brand URLs cited
+   - **Citation position** — Record the position (1st, 2nd, 3rd...) of the brand's domain in the grounding chunks array. This tells you where you sit in the candidate set — position #1 means your content has the highest structural influence on the answer, shaping the AI Overview's opening statement. Track as `citation_position` (1-indexed, null if not cited).
    - **Sentiment** — Classify the mention context as positive/neutral/negative
    - **Competitors** — Extract other brand names and domains from response + citations
 
@@ -114,7 +117,8 @@ For each tracked prompt, show:
    Scans: [total] (since [first scan date])
    Mentioned: [count]/[total] ([%]) — [trend arrow] [trend description]
    Cited: [count]/[total] ([%])
-   Latest: [✅/❌ Mentioned] + [✅/❌ Cited]
+   Citation position: avg #[X.X] (range: #[min]-#[max]) — [trend description]
+   Latest: [✅/❌ Mentioned] + [✅/❌ Cited] [position: #X]
    Sentiment: [positive/neutral/negative]
    Competitors mentioned: [list]
 ```
@@ -122,16 +126,25 @@ For each tracked prompt, show:
 If mentioned in latest scan, include the mention excerpt.
 If not mentioned, note which sources were cited instead and rate the opportunity (HIGH/MEDIUM/LOW).
 
+Position tracking across scans:
+- Show average citation position per prompt across all scans where cited
+- Format: "Average position: #3.2 (range: #1-#7)"
+- Trend: "Position improved from avg #5 to avg #2 over last 4 scans"
+- If not cited, position is null (don't include in averages)
+
 ### Summary Section
 
 ```
 VISIBILITY SCORE
   Brand mentioned: [X]/[total] prompts ([%]) in latest scan
   Brand cited: [X]/[total] prompts ([%]) in latest scan
+  Average citation position: #[X.X] (closer to #1 = more prominent)
+  Position trend: [improving/declining/stable]
 
 TRENDS (last [N] days, [N] scans)
   Mention rate: [%] → [trend]
   Citation rate: [%] → [trend]
+  Citation position: avg #[X] → avg #[Y] ([improving/declining/stable])
   Most improved: [prompt] ([old rate] → [new rate])
   Most volatile: [prompt] (mentioned [X]/[N] scans)
   Consistently absent: [list of prompts never mentioned]
@@ -168,4 +181,11 @@ NEXT ACTIONS
 - After publishing new AEO content, wait 2-4 weeks for indexing before expecting changes
 - Gemini's grounding results can vary run-to-run — that's normal and exactly why we run 20 samples per prompt. Aggregate data over multiple samples and scans is more reliable than any single result
 - Track 10-20 prompts max for a focused view. Too many dilutes the signal (20 prompts × 20 samples = 400 API calls per scan)
+- Citation position matters — being the 1st grounding source means your content shapes the AI Overview's opening statement. Position #1 gets the most prominent mention and the highest structural influence on the answer. Track position trends alongside citation rate to understand your place in the candidate set.
+- Position trend is as important as citation rate trend — you can be cited consistently but be drifting from position #2 to position #6, meaning your structural influence is declining even though you're still in the retrieval set
 - This skill completes the AEO loop: Research (aeo-prompt-research-free) → Create/Refresh (aeo-content-free) → Measure (this skill) → repeat
+
+## Further Reading
+
+- [How to Influence AI Answers](https://www.clearscope.io/blog/how-to-influence-ai-answers) — the retrieval-first framework for AEO
+- [Gemini Creates More Opportunity; GPT Is Harder to Influence](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — why Gemini's search-first behavior matters

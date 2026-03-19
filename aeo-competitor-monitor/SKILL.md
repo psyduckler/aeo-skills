@@ -19,12 +19,12 @@ Track which competitors get cited in AI Overviews — and how that changes over 
 
 ## Why This Matters
 
-AI Overviews create a new competitive landscape. The sources Gemini cites for your key prompts are your real competitors in the AI-driven search world. Tracking their citation share over time reveals:
+AI Overviews create a new competitive landscape. [Influence happens at retrieval, not inside the model](https://www.clearscope.io/blog/how-to-influence-ai-answers) — the sources Gemini cites for your key prompts form the **recurring retrieval set**, and those are your real competitors. [Gemini is search-first](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence), searching before nearly every answer — influence compounds through repeated inclusion in this set. Tracking citation share over time reveals shifts in the recurring retrieval set:
 
-- **Who's gaining ground** — new content that's winning AI citations
-- **Who's losing ground** — previously-cited pages dropping off
-- **Market dynamics** — how citation share shifts with content updates, algorithm changes
-- **Your relative position** — where you stand vs competitors across key prompts
+- **Who's gaining ground** — new content entering the recurring retrieval set
+- **Who's losing ground** — previously-cited pages dropping out of the candidate set
+- **Market dynamics** — how the retrieval set shifts with content updates, algorithm changes
+- **Your relative position** — where you stand in the candidate set vs competitors
 
 ## Requirements
 
@@ -63,6 +63,16 @@ python3 scripts/monitor.py report --data-file monitor-data.json
 python3 scripts/monitor.py report --data-file monitor-data.json --output json
 ```
 
+### Alerts — Check for threshold violations
+
+```bash
+# Check alerts against thresholds
+python3 scripts/monitor.py alerts --data-file monitor-data.json --config alerts.json
+
+# JSON output
+python3 scripts/monitor.py alerts --data-file monitor-data.json --config alerts.json --output json
+```
+
 Run from the skill directory. Resolve `scripts/monitor.py` relative to this SKILL.md.
 
 ## Options
@@ -84,6 +94,55 @@ Run from the skill directory. Resolve `scripts/monitor.py` relative to this SKIL
 |--------|---------|-------------|
 | `--data-file` | `monitor-data.json` | Path to the data file |
 | `--output` | `text` | Output format: `text` or `json` |
+
+### Alerts Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--data-file` | `monitor-data.json` | Path to the data file |
+| `--config` | `alerts.json` | Alert config file path |
+| `--output` | `text` | Output format: `text` or `json` |
+
+### Alert Configuration
+
+Create an `alerts.json` file with threshold rules. Alerts monitor shifts in the recurring retrieval set:
+
+```json
+{
+  "alerts": [
+    {"type": "competitor_above", "domain": "competitor.com", "threshold": 50, "prompt": "*"},
+    {"type": "self_below", "domain": "mybrand.com", "threshold": 30, "prompt": "*"},
+    {"type": "position_drop", "domain": "mybrand.com", "positions": 3, "prompt": "*"},
+    {"type": "new_competitor", "prompt": "*", "min_citation_rate": 20}
+  ]
+}
+```
+
+### Alert Types
+
+| Type | Fires when | What it means |
+|------|-----------|---------------|
+| `competitor_above` | A competitor's citation rate exceeds threshold % | Competitor has entered or solidified their position in the recurring retrieval set |
+| `self_below` | Your own citation rate drops below threshold % | You're falling out of the candidate set — content refresh needed |
+| `position_drop` | Your citation position drops by N positions | Your structural influence is declining even if still cited |
+| `new_competitor` | A domain not seen in previous scans appears with >N% citation rate | New entrant into the recurring retrieval set — potential threat |
+
+Set `prompt` to `"*"` to check all tracked prompts, or specify a single prompt string.
+
+### Alert Output Example
+
+```
+⚠️  3 alert(s) triggered:
+============================================================
+  🔴 COMPETITOR ABOVE THRESHOLD
+     semrush.com citation rate (85%) exceeds threshold (50%) for "best SEO tools"
+
+  🟡 SELF BELOW THRESHOLD
+     mybrand.com citation rate (15%) below threshold (30%) for "content optimization"
+
+  🆕 NEW COMPETITOR
+     New competitor newsite.io appeared with 35% citation rate for "best SEO tools"
+```
 
 ## Output
 
@@ -187,6 +246,11 @@ The data file is append-only JSON. Each scan adds an entry:
 - Use alongside `aeo-analytics-free` for your own brand tracking
 - Use `aeo-ai-overview-simulator` for deep-dive into specific prompts
 - Citation rates fluctuate naturally (±5-10%) — look for sustained trends over 3+ scans
+
+## Further Reading
+
+- [How to Influence AI Answers](https://www.clearscope.io/blog/how-to-influence-ai-answers) — the retrieval-first framework for AEO
+- [Gemini Creates More Opportunity; GPT Is Harder to Influence](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — why Gemini's search-first behavior matters
 
 ## Notes
 

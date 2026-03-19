@@ -22,7 +22,7 @@ Create or refresh content that AI assistants want to cite — using zero paid AP
 
 ## Context: Why This Matters Now
 
-Google's AI Overviews and Search AI Mode are powered by **Gemini 3 Flash** — the model that decides which sources get cited when users ask questions. Understanding what this model looks for in content is the key to AEO success. This skill creates content optimized for citation by AI models, with particular focus on the signals Gemini 3 Flash prioritizes when selecting grounding sources.
+Google's AI Overviews and Search AI Mode are powered by **Gemini 3 Flash** — the model that decides which sources get cited when users ask questions. [Influence happens at retrieval, not inside the model](https://www.clearscope.io/blog/how-to-influence-ai-answers) — you can't edit training data, but you can enter the "candidate set" the model selects from when it searches the web. [Gemini is search-first](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence), searching before nearly every answer, which means creating the right content can get you into the **recurring retrieval set** — the sources the model consistently draws from. Influence compounds through repeated inclusion.
 
 ## Requirements
 
@@ -94,6 +94,22 @@ Before delivering, check the draft against currently-cited sources:
 5. **Entity richness** — specific names, tools, numbers throughout?
 6. **Freshness** — examples, data, references are current?
 
+### Step 4b: Pre-Publish Simulation (Optional, Recommended)
+
+Before delivering the final content, simulate how the target prompt currently performs in AI Overviews. This previews the **current candidate set** your content needs to outperform to enter the recurring retrieval set.
+
+1. If the agent has access to the Gemini API (`GEMINI_API_KEY`), run the target prompt through `gemini-3-flash-preview` with Google Search grounding (20 runs)
+2. From the simulation results, document:
+   - **Currently cited sources** — the top 5 URLs Gemini cites right now, with citation frequency. These are the current recurring retrieval set for this prompt.
+   - **Current answer structure** — what Gemini says, what topics it covers, what entities it names
+   - **Your content's gap advantage** — specific ways the new content outperforms each currently-cited source (based on the draft vs each source)
+   - **Predicted citation path** — which sections of your content are most likely to get cited and why (based on what the model searches for and what the current sources lack)
+3. Include this as an appendix to the delivered content: "AI Overview Simulation (Pre-Publish)"
+
+This step turns the content brief from heuristic-based to data-driven by showing exactly what your content needs to beat. The simulation reveals the current candidate set — the sources you must outperform to enter the recurring retrieval set where influence compounds through repeated inclusion.
+
+**Note:** This step is optional but highly recommended. Skip only if no Gemini API key is available or if speed is critical.
+
 ### Step 5: Deliver with Publishing Guidance
 
 Output final content plus title, meta description (150-160 chars), and:
@@ -133,6 +149,16 @@ Compare existing content against the competitive landscape:
 - **Strengths to preserve** — sections already well-written, potentially already cited → keep as-is
 
 Output: a prioritized list of changes with rationale for each.
+
+### Step R2b: Pre-Refresh Simulation (Optional, Recommended)
+
+Same as Create Mode Step 4b, but run before editing. This tells you:
+- What the current candidate set looks like for your target prompt
+- Whether your existing page is already in the recurring retrieval set (and at what position)
+- Which specific gaps in your content are keeping you out (or pushing you down)
+- What the edit needs to accomplish to enter or improve position in the candidate set
+
+Run the target prompt through `gemini-3-flash-preview` with Google Search grounding (20 runs). Document the results and use them to prioritize edits in Step R3 — focus on the gaps that will move you into or up in the recurring retrieval set.
 
 ### Step R3: Edit (Not Rewrite)
 
@@ -179,3 +205,8 @@ Deliver with the same publishing guidance as Create Step 5.
 - For comparison prompts ("X vs Y"), be balanced — AI models avoid citing biased sources
 - Shorter, sharper content that directly answers the prompt beats long rambling pieces
 - This skill pairs with `aeo-prompt-research-free` which identifies target prompts
+
+## Further Reading
+
+- [How to Influence AI Answers](https://www.clearscope.io/blog/how-to-influence-ai-answers) — the retrieval-first framework for AEO
+- [Gemini Creates More Opportunity; GPT Is Harder to Influence](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — why Gemini's search-first behavior matters

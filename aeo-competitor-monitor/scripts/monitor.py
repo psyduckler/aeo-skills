@@ -409,6 +409,209 @@ def format_report_text(report: dict, scans: list) -> str:
     return "\n".join(lines)
 
 
+# ── Alerts Command ─────────────────────────────────────────────────────────
+
+def load_alert_config(config_file: str) -> dict:
+    """Load alert configuration from JSON file."""
+    if not os.path.exists(config_file):
+        print(f"Error: alert config file not found: {config_file}", file=sys.stderr)
+        sys.exit(1)
+    with open(config_file) as f:
+        return json.load(f)
+
+
+def check_alerts(data: dict, config: dict) -> list:
+    """Check scan data against alert thresholds. Returns list of triggered alerts."""
+    scans = data.get("scans", [])
+    if not scans:
+        return []
+
+    alerts_config = config.get("alerts", [])
+    if not alerts_config:
+        return []
+
+    latest = scans[-1]
+    previous = scans[-2] if len(scans) >= 2 else None
+    triggered = []
+
+    for alert in alerts_config:
+        alert_type = alert.get("type", "")
+
+        # Determine which prompts to check
+        target_prompt = alert.get("prompt", "*")
+        prompts_to_check = []
+        if target_prompt == "*":
+            prompts_to_check = list(latest["results"].keys())
+        elif target_prompt in latest["results"]:
+            prompts_to_check = [target_prompt]
+        else:
+            continue  # prompt not found in latest scan
+
+        if alert_type == "competitor_above":
+            domain = alert.get("domain", "")
+            threshold = alert.get("threshold", 50)
+            for prompt in prompts_to_check:
+                result = latest["results"][prompt]
+                comp_data = result.get("competitors", {}).get(domain, {})
+                rate = comp_data.get("citation_rate", 0)
+                if rate >= threshold:
+                    triggered.append({
+                        "type": "competitor_above",
+                        "domain": domain,
+                        "prompt": prompt,
+                        "citation_rate": rate,
+                        "threshold": threshold,
+                        "message": f"{domain} citation rate ({rate}%) exceeds threshold ({threshold}%) for \"{prompt}\"",
+                    })
+
+        elif alert_type == "self_below":
+            domain = alert.get("domain", "")
+            threshold = alert.get("threshold", 30)
+            for prompt in prompts_to_check:
+                result = latest["results"][prompt]
+                comp_data = result.get("competitors", {}).get(domain, {})
+                rate = comp_data.get("citation_rate", 0)
+                if rate < threshold:
+                    triggered.append({
+                        "type": "self_below",
+                        "domain": domain,
+                        "prompt": prompt,
+                        "citation_rate": rate,
+                        "threshold": threshold,
+                        "message": f"{domain} citation rate ({rate}%) below threshold ({threshold}%) for \"{prompt}\"",
+                    })
+
+        elif alert_type == "position_drop":
+            domain = alert.get("domain", "")
+            positions = alert.get("positions", 3)
+            if not previous:
+                continue
+            for prompt in prompts_to_check:
+                # Calculate position from source order in latest vs previous
+                latest_result = latest["results"].get(prompt, {})
+                prev_result = previous["results"].get(prompt, {})
+                if not latest_result or not prev_result:
+                    continue
+
+                # Get citation position from other_sources + competitors
+                def get_position(scan_result, target_domain):
+                    """Get domain position in citation ranking (1-indexed)."""
+                    all_domains = []
+                    # Collect all domains with citation rates
+                    for comp, cdata in scan_result.get("competitors", {}).items():
+                        comp_clean = comp.lower().replace("www.", "")
+                        all_domains.append((comp_clean, cdata.get("citation_rate", 0)))
+                    for src in scan_result.get("other_sources", []):
+                        all_domains.append((src["domain"], src.get("citation_rate", 0)))
+                    # Sort by citation rate desc
+                    all_domains.sort(key=lambda x: -x[1])
+                    target_clean = target_domain.lower().replace("www.", "")
+                    for idx, (d, _) in enumerate(all_domains):
+                        if target_clean in d or d in target_clean:
+                            return idx + 1
+                    return None
+
+                latest_pos = get_position(latest_result, domain)
+                prev_pos = get_position(prev_result, domain)
+
+                if latest_pos is not None and prev_pos is not None:
+                    drop = latest_pos - prev_pos  # positive = worse position
+                    if drop >= positions:
+                        triggered.append({
+                            "type": "position_drop",
+                            "domain": domain,
+                            "prompt": prompt,
+                            "previous_position": prev_pos,
+                            "current_position": latest_pos,
+                            "positions_dropped": drop,
+                            "message": f"{domain} dropped {drop} positions (#{prev_pos} → #{latest_pos}) for \"{prompt}\"",
+                        })
+
+        elif alert_type == "new_competitor":
+            min_rate = alert.get("min_citation_rate", 20)
+            if not previous:
+                continue
+            for prompt in prompts_to_check:
+                latest_result = latest["results"].get(prompt, {})
+                prev_result = previous["results"].get(prompt, {})
+                if not latest_result or not prev_result:
+                    continue
+
+                # Collect all domains from previous scan
+                prev_domains = set()
+                for comp in prev_result.get("competitors", {}).keys():
+                    prev_domains.add(comp.lower().replace("www.", ""))
+                for src in prev_result.get("other_sources", []):
+                    prev_domains.add(src["domain"].lower().replace("www.", ""))
+
+                # Check for new domains in latest scan
+                for comp, cdata in latest_result.get("competitors", {}).items():
+                    comp_clean = comp.lower().replace("www.", "")
+                    rate = cdata.get("citation_rate", 0)
+                    if comp_clean not in prev_domains and rate >= min_rate:
+                        triggered.append({
+                            "type": "new_competitor",
+                            "domain": comp,
+                            "prompt": prompt,
+                            "citation_rate": rate,
+                            "message": f"New competitor {comp} appeared with {rate}% citation rate for \"{prompt}\"",
+                        })
+                for src in latest_result.get("other_sources", []):
+                    d = src["domain"].lower().replace("www.", "")
+                    rate = src.get("citation_rate", 0)
+                    if d not in prev_domains and rate >= min_rate:
+                        triggered.append({
+                            "type": "new_competitor",
+                            "domain": d,
+                            "prompt": prompt,
+                            "citation_rate": rate,
+                            "message": f"New competitor {d} appeared with {rate}% citation rate for \"{prompt}\"",
+                        })
+
+    return triggered
+
+
+def format_alerts_text(triggered: list) -> str:
+    """Format triggered alerts as text."""
+    if not triggered:
+        return "No alerts triggered."
+
+    lines = []
+    lines.append(f"⚠️  {len(triggered)} alert(s) triggered:")
+    lines.append("=" * 60)
+
+    for alert in triggered:
+        alert_type = alert["type"]
+        if alert_type == "competitor_above":
+            lines.append(f"  🔴 COMPETITOR ABOVE THRESHOLD")
+        elif alert_type == "self_below":
+            lines.append(f"  🟡 SELF BELOW THRESHOLD")
+        elif alert_type == "position_drop":
+            lines.append(f"  🔻 POSITION DROP")
+        elif alert_type == "new_competitor":
+            lines.append(f"  🆕 NEW COMPETITOR")
+        lines.append(f"     {alert['message']}")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def cmd_alerts(args):
+    """Check data against alert thresholds."""
+    if not os.path.exists(args.data_file):
+        print(f"Error: data file not found: {args.data_file}", file=sys.stderr)
+        sys.exit(1)
+
+    data = load_data(args.data_file)
+    config = load_alert_config(args.config)
+    triggered = check_alerts(data, config)
+
+    if args.output == "json":
+        print(json.dumps({"alerts_triggered": triggered}, indent=2))
+    else:
+        print(format_alerts_text(triggered))
+
+
 # ── CLI ────────────────────────────────────────────────────────────────────
 
 def main():
@@ -439,12 +642,23 @@ def main():
     report_parser.add_argument("--output", choices=["text", "json"], default="text",
                                help="Output format (default: text)")
 
+    # Alerts subcommand
+    alerts_parser = subparsers.add_parser("alerts", help="Check data against alert thresholds")
+    alerts_parser.add_argument("--data-file", default="monitor-data.json",
+                               help="Data file path (default: monitor-data.json)")
+    alerts_parser.add_argument("--config", default="alerts.json",
+                               help="Alert config file (default: alerts.json)")
+    alerts_parser.add_argument("--output", choices=["text", "json"], default="text",
+                               help="Output format (default: text)")
+
     args = parser.parse_args()
 
     if args.command == "scan":
         cmd_scan(args)
     elif args.command == "report":
         cmd_report(args)
+    elif args.command == "alerts":
+        cmd_alerts(args)
 
 
 if __name__ == "__main__":
