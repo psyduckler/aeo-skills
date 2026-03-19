@@ -6,6 +6,43 @@ A suite of open-source skills that help AI agents optimize content for **Answer 
 
 **Default sample count:** 20 runs per prompt. AI responses are probabilistic; a single run can miss mentions that appear 30-40% of the time. 20 samples balances accuracy with API cost.
 
+## Why Gemini Is the Only Model That Matters for AEO (Right Now)
+
+We ran a 7-day study across 4 prompt types × 2 models (ChatGPT GPT-5 and Gemini), analyzing 1,963 responses. The results are clear: **optimizing for Gemini is the only AEO strategy that makes sense today.**
+
+### Gemini searches the web 100% of the time. ChatGPT only ~45%.
+
+Gemini issued web searches on **every single response** and used **265 unique search queries**. ChatGPT only searched **45% of the time** with just **4 unique queries total**. That's a 66× difference in search diversity.
+
+![Gemini vs ChatGPT search behavior](./assets/gemini-vs-chatgpt-search-behavior.png)
+
+**What this means:** Gemini's responses are deeply dependent on live web content — your content's presence (or absence) in search results directly determines whether Gemini cites you. ChatGPT mostly relies on its parametric knowledge and rarely searches, making it nearly impossible to influence through content optimization alone.
+
+**Why ChatGPT doesn't search much:**
+- **Cost** — Web search is expensive at ChatGPT's scale. Every search query adds latency and API costs. OpenAI has strong economic incentives to minimize search usage.
+- **Legal risk** — There are ongoing concerns about ChatGPT searching Google at scale. Google could restrict or litigate over systematic scraping of search results, so OpenAI keeps search usage conservative.
+- **Architecture** — ChatGPT was designed as a parametric model first, with search as an optional enhancement. Gemini was built with Google Search as a native, always-on capability.
+
+### A single 20-sample run captures 74–100% of query diversity
+
+Our control run analysis shows that a single batch of responses captures the vast majority of the search query universe for any given prompt. Informational prompts had **100% coverage** — zero new queries over 7 days. Even dynamic prompts (research, fresh, commercial) showed **74–83% coverage** from the initial sample.
+
+![Control run coverage](./assets/control-run-coverage.png)
+
+**This is why we default to 20 samples.** It's enough to reliably map the query landscape for a prompt — catching most of the search queries Gemini will use, without burning excessive API credits.
+
+### The bottom line
+
+If you're doing AEO/GEO today, **focus on Gemini**. It's the model that:
+1. **Always searches the web** — your content can actually influence its responses
+2. **Powers Google AI Overviews** — the largest answer engine by traffic (25% of Google searches trigger AI Overviews)
+3. **Uses diverse search queries** — creating multiple pathways for your content to get discovered and cited
+4. **Is measurable** — the Gemini API with grounding lets you simulate exactly what the model does, so you can test and iterate
+
+ChatGPT's limited search behavior means traditional SEO and brand authority matter more for getting cited there. But Gemini? That's where content optimization has the most direct, measurable impact.
+
+---
+
 ## Skills
 
 ### Core Pipeline
