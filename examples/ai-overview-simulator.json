@@ -3,7 +3,7 @@
     "prompt": "best seo tools for small businesses",
     "model": "gemini-3-flash-preview",
     "runs": 20,
-    "domain": "clearscope.io",
+    "domain": "acme.com",
     "diff_enabled": true,
     "timestamp": "2026-03-19T14:23:07Z",
     "duration_seconds": 47.3
@@ -52,13 +52,13 @@
         ]
       },
       {
-        "domain": "clearscope.io",
+        "domain": "acme.com",
         "citations": 8,
         "rate": 0.40,
         "avg_position": 3.9,
         "urls": [
-          "https://www.clearscope.io/",
-          "https://www.clearscope.io/blog/content-optimization"
+          "https://www.acme.com/",
+          "https://www.acme.com/blog/content-optimization"
         ]
       },
       {
@@ -110,7 +110,7 @@
     ]
   },
   "domain_tracking": {
-    "domain": "clearscope.io",
+    "domain": "acme.com",
     "mention_rate": 0.60,
     "mention_count": 12,
     "citation_rate": 0.40,
@@ -121,19 +121,19 @@
     "context_snippets": [
       {
         "run": 3,
-        "text": "Clearscope uses AI to analyze top-ranking content and provides optimization recommendations based on relevant terms and topics."
+        "text": "Acme uses AI to analyze top-ranking content and provides optimization recommendations based on relevant terms and topics."
       },
       {
         "run": 7,
-        "text": "For content optimization specifically, tools like Clearscope and Surfer SEO help small businesses create content that ranks."
+        "text": "For content optimization specifically, tools like Acme and Surfer SEO help small businesses create content that ranks."
       },
       {
         "run": 11,
-        "text": "Clearscope offers real-time content grading and integrates with Google Docs and WordPress."
+        "text": "Acme offers real-time content grading and integrates with Google Docs and WordPress."
       },
       {
         "run": 18,
-        "text": "…other popular options include Clearscope for content optimization and Screaming Frog for technical audits."
+        "text": "…other popular options include Acme for content optimization and Screaming Frog for technical audits."
       }
     ]
   },

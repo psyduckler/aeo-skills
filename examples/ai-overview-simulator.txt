@@ -5,7 +5,7 @@
   Prompt:    "best seo tools for small businesses"
   Model:     gemini-3-flash-preview (with Google Search grounding)
   Runs:      20
-  Domain:    clearscope.io
+  Domain:    acme.com
   Diff:      enabled
   Timestamp: 2026-03-19T14:23:07Z
 
@@ -22,7 +22,7 @@
    2    ahrefs.com                       16/20      80.0%    1.8
    3    backlinko.com                    14/20      70.0%    3.1
    4    searchenginejournal.com          12/20      60.0%    3.6
-   5    clearscope.io                     8/20      40.0%    3.9
+   5    acme.com                     8/20      40.0%    3.9
    6    moz.com                           8/20      40.0%    4.2
    7    hubspot.com                       7/20      35.0%    5.1
    8    neilpatel.com                     6/20      30.0%    4.8
@@ -33,7 +33,7 @@
   Average sources per response: 4.7
 
 ================================================================================
-  DOMAIN TRACKING — clearscope.io
+  DOMAIN TRACKING — acme.com
 ================================================================================
 
   Mention Rate:     12/20 (60.0%)   — brand name appeared in response text
@@ -43,13 +43,13 @@
   Worst Position:   6               — lowest rank achieved (run #14)
 
   Context snippets (sample):
-    Run #3:  "Clearscope uses AI to analyze top-ranking content and provides
+    Run #3:  "Acme uses AI to analyze top-ranking content and provides
              optimization recommendations based on relevant terms and topics."
-    Run #7:  "For content optimization specifically, tools like Clearscope and
+    Run #7:  "For content optimization specifically, tools like Acme and
              Surfer SEO help small businesses create content that ranks."
-    Run #11: "Clearscope offers real-time content grading and integrates with
+    Run #11: "Acme offers real-time content grading and integrates with
              Google Docs and WordPress."
-    Run #18: "…other popular options include Clearscope for content optimization
+    Run #18: "…other popular options include Acme for content optimization
              and Screaming Frog for technical audits."
 
 ================================================================================
@@ -117,7 +117,7 @@
     Total unique sentence variants:         18
 
 ================================================================================
-  RECOMMENDATIONS FOR clearscope.io
+  RECOMMENDATIONS FOR acme.com
 ================================================================================
 
   ✅ Strengths:

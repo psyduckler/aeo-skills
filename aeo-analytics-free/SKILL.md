@@ -19,7 +19,7 @@ description: >
 
 Track whether AI assistants mention and cite your brand — and how that changes over time.
 
-**The Retrieval Framework:** [Influence happens at retrieval, not inside the model.](https://www.clearscope.io/blog/how-to-influence-ai-answers) You can't edit a model's training data — but you can enter the "candidate set" the model selects from when it searches the web. This skill measures whether you're in that candidate set, where you sit in it (citation position), and whether your position is improving over time. [Gemini is search-first](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence), searching before nearly every answer — influence compounds through repeated inclusion in the recurring retrieval set.
+**The Retrieval Framework:** Influence happens at retrieval, not inside the model. You can't edit a model's training data — but you can enter the "candidate set" the model selects from when it searches the web. This skill measures whether you're in that candidate set, where you sit in it (citation position), and whether your position is improving over time. Gemini is search-first, searching before nearly every answer — influence compounds through repeated inclusion in the recurring retrieval set.
 
 ## Requirements
 
@@ -187,5 +187,4 @@ NEXT ACTIONS
 
 ## Further Reading
 
-- [How to Influence AI Answers](https://www.clearscope.io/blog/how-to-influence-ai-answers) — the retrieval-first framework for AEO
-- [Gemini Creates More Opportunity; GPT Is Harder to Influence](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — why Gemini's search-first behavior matters
+

@@ -17,120 +17,19 @@ import json
 import os
 import re
 import sys
-import time
-import urllib.request
-import urllib.error
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-
-# ── Intent Classification ───────────────────────────────────────────────────
-
-def classify_intent(query: str) -> str:
-    """Classify search query intent using keyword/pattern matching.
-
-    Returns one of: informational, commercial, navigational, transactional
-    """
-    q = query.strip().lower()
-
-    # Transactional — strongest signals, check first
-    transactional_patterns = [
-        r'\bbuy\b', r'\bpurchase\b', r'\border\b', r'\bsubscribe\b',
-        r'\bdownload\b', r'\binstall\b', r'\bget started\b',
-        r'\bfree trial\b', r'\btrial\b', r'\bdiscount\b', r'\bcoupon\b',
-        r'\bpromo\b', r'\bdeal\b', r'\bpricing\b', r'\bprice\b',
-        r'\bcost\b', r'\bcheap\b', r'\baffordable\b', r'\bsign up\b',
-        r'\bregister\b', r'\bcheckout\b',
-    ]
-    for pat in transactional_patterns:
-        if re.search(pat, q):
-            return "transactional"
-
-    # Navigational — brand/domain references
-    navigational_patterns = [
-        r'\blogin\b', r'\blog in\b', r'\bsign in\b', r'\bsignin\b',
-        r'\bwebsite\b', r'\bofficial\b', r'\bhomepage\b',
-        r'\b\w+\.(com|org|net|io|ai|co|dev)\b',  # domain names
-        r'\bapp\b', r'\bportal\b', r'\bdashboard\b', r'\baccount\b',
-    ]
-    for pat in navigational_patterns:
-        if re.search(pat, q):
-            return "navigational"
-
-    # Commercial — comparison/evaluation signals
-    commercial_patterns = [
-        r'\bbest\b', r'\btop\b', r'\bvs\b', r'\bversus\b', r'\bcompare\b',
-        r'\bcomparison\b', r'\breview\b', r'\breviews\b', r'\brating\b',
-        r'\brated\b', r'\brecommend\b', r'\balternative\b', r'\balternatives\b',
-        r'\bpros and cons\b', r'\bworth it\b', r'\bshould i\b',
-        r'\bwhich\b.*\bbetter\b', r'\bbetter than\b',
-    ]
-    for pat in commercial_patterns:
-        if re.search(pat, q):
-            return "commercial"
-
-    # Informational — default / knowledge-seeking
-    return "informational"
-
-
-# ── Gemini API ──────────────────────────────────────────────────────────────
-
-def call_gemini(prompt: str, api_key: str, model: str) -> dict:
-    """Call Gemini API with Google Search grounding."""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-    payload = json.dumps({
-        "contents": [{"parts": [{"text": prompt}]}],
-        "tools": [{"google_search": {}}],
-    }).encode()
-    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-    for attempt in range(5):
-        try:
-            with urllib.request.urlopen(req, timeout=180) as resp:
-                return json.loads(resp.read())
-        except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt < 4:
-                wait = (2 ** attempt) + 1
-                print(f"    Rate limited, waiting {wait}s...", file=sys.stderr)
-                time.sleep(wait)
-            elif attempt < 4:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": f"HTTP {e.code}: {e.reason}"}
-        except (urllib.error.URLError, TimeoutError, OSError) as e:
-            if attempt < 4:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": str(e)}
-
-
-def extract_queries(response: dict) -> list:
-    """Extract web search queries from grounding metadata."""
-    queries = []
-    for cand in response.get("candidates", []):
-        meta = cand.get("groundingMetadata", {})
-        queries.extend(meta.get("webSearchQueries", []))
-    return queries
-
-
-def extract_sources(response: dict) -> list:
-    """Extract grounding sources from response."""
-    sources = []
-    seen = set()
-    for cand in response.get("candidates", []):
-        meta = cand.get("groundingMetadata", {})
-        for chunk in meta.get("groundingChunks", []):
-            web = chunk.get("web", {})
-            uri = web.get("uri", "")
-            title = web.get("title", "")
-            if uri and uri not in seen:
-                seen.add(uri)
-                sources.append({"title": title, "uri": uri})
-    return sources
+# ── Shared imports ──────────────────────────────────────────────────────────
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from shared.gemini_client import (
+    call_gemini, extract_queries, extract_sources, classify_intent, get_api_key,
+    DEFAULT_MODEL, DEFAULT_RUNS, DEFAULT_CONCURRENCY,
+)
 
 
 # ── Query Clustering ────────────────────────────────────────────────────────
 
-# Common stop words to exclude from clustering
 STOP_WORDS = frozenset([
     "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
     "of", "with", "by", "from", "is", "are", "was", "were", "be", "been",
@@ -147,28 +46,17 @@ def tokenize(text: str) -> set:
 
 
 def cluster_queries(queries_with_freq: list, min_shared: int = 2) -> list:
-    """Cluster queries that share significant terms.
-
-    Args:
-        queries_with_freq: list of (query, count, frequency) tuples
-        min_shared: minimum shared non-stop words to cluster together
-
-    Returns:
-        list of clusters: [{label, queries: [{query, count, frequency}], coverage}]
-    """
+    """Cluster queries that share significant terms."""
     if not queries_with_freq:
         return []
 
-    # Tokenize all queries
     query_tokens = []
     for q, count, freq in queries_with_freq:
         tokens = tokenize(q)
         query_tokens.append((q, count, freq, tokens))
 
-    # Find shared term pairs/triples that appear in multiple queries
     term_groups = defaultdict(list)
     for q, count, freq, tokens in query_tokens:
-        # Use 2-word combinations as cluster keys
         sorted_tokens = sorted(tokens)
         for i in range(len(sorted_tokens)):
             for j in range(i + 1, min(i + 4, len(sorted_tokens) + 1)):
@@ -176,11 +64,9 @@ def cluster_queries(queries_with_freq: list, min_shared: int = 2) -> list:
                 if len(sorted_tokens[i:j]) >= min_shared:
                     term_groups[key].append((q, count, freq))
 
-    # Filter to groups with 2+ queries, pick best non-overlapping clusters
     candidate_clusters = []
     for label, members in term_groups.items():
         if len(members) >= 2:
-            # Calculate cluster coverage (max frequency across members)
             max_freq = max(f for _, _, f in members)
             candidate_clusters.append({
                 "label": label,
@@ -189,14 +75,11 @@ def cluster_queries(queries_with_freq: list, min_shared: int = 2) -> list:
                 "size": len(members),
             })
 
-    # Sort by size * coverage, deduplicate
     candidate_clusters.sort(key=lambda c: -(c["size"] * c["coverage"]))
 
-    # Deduplicate: don't repeat same query across clusters
     used_queries = set()
     final_clusters = []
     for cluster in candidate_clusters:
-        # Keep only queries not already used
         new_queries = [q for q in cluster["queries"] if q["query"] not in used_queries]
         if len(new_queries) >= 2:
             for q in new_queries:
@@ -242,7 +125,6 @@ def analyze_prompt(prompt: str, runs: int, model: str, concurrency: int, api_key
 
     successful_runs = len(all_run_queries)
 
-    # Query frequency (deduplicated per run)
     query_run_count = defaultdict(int)
     for run_queries in all_run_queries:
         seen_in_run = set()
@@ -259,10 +141,8 @@ def analyze_prompt(prompt: str, runs: int, model: str, concurrency: int, api_key
         for q, c in sorted_queries
     ]
 
-    # Cluster queries
     clusters = cluster_queries(queries_with_freq)
 
-    # Intent classification
     intent_counts = defaultdict(int)
     queries_out = []
     for q, c, f in queries_with_freq:
@@ -276,7 +156,6 @@ def analyze_prompt(prompt: str, runs: int, model: str, concurrency: int, api_key
         cnt = intent_counts.get(intent_type, 0)
         intent_distribution[intent_type] = round(cnt / total_unique * 100) if total_unique else 0
 
-    # Source frequency
     source_count = defaultdict(int)
     for s in all_sources:
         domain = s.get("title", s.get("uri", ""))
@@ -307,13 +186,11 @@ def cross_prompt_analysis(prompt_results: list) -> dict:
     if len(prompt_results) < 2:
         return {}
 
-    # Build query-to-prompts map
     query_prompts = defaultdict(set)
     for i, result in enumerate(prompt_results):
         for q in result["queries"]:
             query_prompts[q["query"]].add(i)
 
-    # Shared queries (appear in 2+ prompts)
     shared = []
     for query, prompt_indices in sorted(query_prompts.items(), key=lambda x: -len(x[1])):
         if len(prompt_indices) >= 2:
@@ -323,14 +200,12 @@ def cross_prompt_analysis(prompt_results: list) -> dict:
                 "prompt_indices": sorted(prompt_indices),
             })
 
-    # Unique queries (appear in exactly 1 prompt)
     unique_per_prompt = defaultdict(list)
     for query, prompt_indices in query_prompts.items():
         if len(prompt_indices) == 1:
             idx = next(iter(prompt_indices))
             unique_per_prompt[idx].append(query)
 
-    # Overlap matrix
     n = len(prompt_results)
     overlap_matrix = []
     for i in range(n):
@@ -382,7 +257,6 @@ def format_prompt_text(result: dict, index: int = None) -> list:
         lines.append("Query Clusters:")
         lines.append("-" * 60)
         for cluster in result["clusters"]:
-            member_freqs = [f"{q['frequency']}%" for q in cluster["queries"]]
             lines.append(f"  [{cluster['label']}] ({cluster['size']} queries)")
             for q in cluster["queries"]:
                 lines.append(f"    - {q['query']} ({q['frequency']}%)")
@@ -441,16 +315,15 @@ def main():
     )
     parser.add_argument("prompt", nargs="*", help="One or more prompts to analyze")
     parser.add_argument("--prompts-file", help="File with one prompt per line")
-    parser.add_argument("--runs", type=int, default=20, help="Runs per prompt (default: 20)")
-    parser.add_argument("--model", default="gemini-3-flash-preview",
+    parser.add_argument("--runs", type=int, default=DEFAULT_RUNS, help="Runs per prompt (default: 20)")
+    parser.add_argument("--model", default=DEFAULT_MODEL,
                         help="Gemini model (default: gemini-3-flash-preview)")
-    parser.add_argument("--concurrency", type=int, default=5,
+    parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
                         help="Max concurrent requests (default: 5)")
     parser.add_argument("--output", choices=["text", "json"], default="text",
                         help="Output format (default: text)")
     args = parser.parse_args()
 
-    # Collect prompts
     prompts = list(args.prompt) if args.prompt else []
     if args.prompts_file:
         try:
@@ -467,21 +340,15 @@ def main():
         print("Error: provide at least one prompt (positional or via --prompts-file)", file=sys.stderr)
         sys.exit(1)
 
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("Error: GEMINI_API_KEY environment variable required", file=sys.stderr)
-        sys.exit(1)
+    api_key = get_api_key()
 
-    # Analyze each prompt
     prompt_results = []
     for prompt in prompts:
         result = analyze_prompt(prompt, args.runs, args.model, args.concurrency, api_key)
         prompt_results.append(result)
 
-    # Cross-prompt analysis
     cross = cross_prompt_analysis(prompt_results) if len(prompt_results) > 1 else {}
 
-    # Output
     if args.output == "json":
         output = {
             "prompts": prompt_results,

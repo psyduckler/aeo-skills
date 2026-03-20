@@ -19,9 +19,9 @@ Detect when your own pages compete against each other for the same slots in Gemi
 
 ## Background
 
-Influence over AI answers [happens at retrieval, not inside the model](https://www.clearscope.io/blog/how-to-influence-ai-answers). When Gemini searches the web to answer a prompt, it builds a **candidate set** of pages to cite. If two of your own pages both enter that candidate set for the same prompt, you're competing against yourself — Gemini alternates between citing page A and page B, diluting the citation strength of both.
+Influence over AI answers happens at retrieval, not inside the model. When Gemini searches the web to answer a prompt, it builds a **candidate set** of pages to cite. If two of your own pages both enter that candidate set for the same prompt, you're competing against yourself — Gemini alternates between citing page A and page B, diluting the citation strength of both.
 
-This matters because [influence compounds through repeated inclusion](https://www.clearscope.io/blog/how-to-influence-ai-answers) in the **recurring retrieval set**. A page that gets cited 90% of the time is building authority. Two pages that each get cited 40% are neither building authority. In a search-first system like Gemini, where [every response triggers web retrieval](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence), having a single strong page in the candidate set beats splitting your authority across competing pages.
+This matters because influence compounds through repeated inclusion in the **recurring retrieval set**. A page that gets cited 90% of the time is building authority. Two pages that each get cited 40% are neither building authority. In a search-first system like Gemini, where every response triggers web retrieval, having a single strong page in the candidate set beats splitting your authority across competing pages.
 
 ## Defaults
 
@@ -39,24 +39,24 @@ This matters because [influence compounds through repeated inclusion](https://ww
 ```bash
 # Check two prompts for cannibalization
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/detect.py --domain clearscope.io \
+  python3 scripts/detect.py --domain acme.com \
     "best content optimization tools" \
     "SEO content software"
 
 # Load prompts from a file
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/detect.py --domain clearscope.io --prompts-file prompts.txt
+  python3 scripts/detect.py --domain acme.com --prompts-file prompts.txt
 
 # Both positional prompts and file, JSON output
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/detect.py --domain clearscope.io \
+  python3 scripts/detect.py --domain acme.com \
     "content optimization" \
     --prompts-file more-prompts.txt \
     --output json
 
 # Higher confidence with more runs
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/detect.py --domain clearscope.io \
+  python3 scripts/detect.py --domain acme.com \
     "best SEO tools" --runs 30
 ```
 
@@ -79,7 +79,7 @@ Run from the skill directory. Resolve `scripts/detect.py` relative to this SKILL
 ### Text Output
 
 ```
-Cannibalization Detector: clearscope.io
+Cannibalization Detector: acme.com
 Model: gemini-3-flash-preview | Runs per prompt: 20
 
 RESULTS BY PROMPT:
@@ -90,11 +90,11 @@ RESULTS BY PROMPT:
   Status: 🔴 HIGH cannibalization
   Competing URLs:
     45% (9/20) /blog/content-optimization-tools — Best Content Optimization Tools (2025)
-      https://clearscope.io/blog/content-optimization-tools
-    35% (7/20) /product — Clearscope - Content Optimization Platform
-      https://clearscope.io/product
+      https://acme.com/blog/content-optimization-tools
+    35% (7/20) /product — Acme - Content Optimization Platform
+      https://acme.com/product
     15% (3/20) /blog/seo-content-tools — SEO Content Tools Guide
-      https://clearscope.io/blog/seo-content-tools
+      https://acme.com/blog/seo-content-tools
   → No single URL exceeds 50% citation rate. Gemini can't decide which
     of your pages to cite — citations are diluted across 3 URLs.
     Strongly recommend consolidating into one comprehensive page.
@@ -102,12 +102,12 @@ RESULTS BY PROMPT:
 "SEO content software"
   Runs: 20 | Domain URLs found: 1
   Status: ✓ No cannibalization
-    85% — https://clearscope.io/product
+    85% — https://acme.com/product
   No cannibalization — single URL cited consistently.
 
 SUMMARY:
 ======================================================================
-  Domain: clearscope.io
+  Domain: acme.com
   Prompts analyzed: 2
   Cannibalization detected: 1/2
   Severity: HIGH: 1
@@ -150,8 +150,7 @@ Structured JSON with per-prompt `cannibalization` details (severity, URLs, rates
 
 ## References
 
-- [How to Influence AI Answers](https://www.clearscope.io/blog/how-to-influence-ai-answers) — Why influence requires entering the candidate set, not splitting across it
-- [Gemini Creates More Opportunity; GPT Is Harder to Influence](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — Search-first retrieval and the permeability of Gemini's citation pipeline
+
 
 ## Notes
 

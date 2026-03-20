@@ -19,9 +19,9 @@ Map the entity universe of the recurring retrieval set — the specific brands, 
 
 ## Background
 
-When Gemini retrieves information to answer a prompt, it doesn't just cite sources — it [extracts and repeats specific entities from those sources](https://www.clearscope.io/blog/how-to-influence-ai-answers): brand names, statistics, people, product names, and data points. These entities form the **entity universe** of the recurring retrieval set for that topic.
+When Gemini retrieves information to answer a prompt, it doesn't just cite sources — it extracts and repeats specific entities from those sources: brand names, statistics, people, product names, and data points. These entities form the **entity universe** of the recurring retrieval set for that topic.
 
-If your content doesn't include the entities Gemini expects for a topic, you're less likely to enter the candidate set. Conversely, if your content mentions the same brands, cites the same statistics, and references the same tools that Gemini consistently includes in its answers, you signal topical alignment and comprehensiveness. In [Gemini's search-first architecture](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence), the model builds its response from retrieved content — your content needs to speak the same entity language as the rest of the candidate set.
+If your content doesn't include the entities Gemini expects for a topic, you're less likely to enter the candidate set. Conversely, if your content mentions the same brands, cites the same statistics, and references the same tools that Gemini consistently includes in its answers, you signal topical alignment and comprehensiveness. In Gemini's search-first architecture, the model builds its response from retrieved content — your content needs to speak the same entity language as the rest of the candidate set.
 
 The "long long tail" of Gemini's varied search queries means entities that appear across many different query variations are the strongest signals of topic authority. This skill identifies those high-frequency entities.
 
@@ -163,8 +163,7 @@ Structured JSON with per-type entity rankings, source domains, and gap analysis.
 
 ## References
 
-- [How to Influence AI Answers](https://www.clearscope.io/blog/how-to-influence-ai-answers) — Why entity alignment helps content enter the candidate set
-- [Gemini Creates More Opportunity; GPT Is Harder to Influence](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — The entity universe of search-first retrieval
+
 
 ## Notes
 

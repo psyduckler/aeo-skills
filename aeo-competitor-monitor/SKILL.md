@@ -19,7 +19,7 @@ Track which competitors get cited in AI Overviews — and how that changes over 
 
 ## Why This Matters
 
-AI Overviews create a new competitive landscape. [Influence happens at retrieval, not inside the model](https://www.clearscope.io/blog/how-to-influence-ai-answers) — the sources Gemini cites for your key prompts form the **recurring retrieval set**, and those are your real competitors. [Gemini is search-first](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence), searching before nearly every answer — influence compounds through repeated inclusion in this set. Tracking citation share over time reveals shifts in the recurring retrieval set:
+AI Overviews create a new competitive landscape. Influence happens at retrieval, not inside the model — the sources Gemini cites for your key prompts form the **recurring retrieval set**, and those are your real competitors. Gemini is search-first, searching before nearly every answer — influence compounds through repeated inclusion in this set. Tracking citation share over time reveals shifts in the recurring retrieval set:
 
 - **Who's gaining ground** — new content entering the recurring retrieval set
 - **Who's losing ground** — previously-cited pages dropping out of the candidate set
@@ -41,14 +41,14 @@ AI Overviews create a new competitive landscape. [Influence happens at retrieval
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
   python3 scripts/monitor.py scan \
     --prompts "best SEO tools" "content optimization software" \
-    --competitors clearscope.io surferseo.com semrush.com \
+    --competitors acme.com surferseo.com semrush.com \
     --data-file monitor-data.json
 
 # With custom run count
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
   python3 scripts/monitor.py scan \
     --prompts "best SEO tools" \
-    --competitors clearscope.io surferseo.com \
+    --competitors acme.com surferseo.com \
     --data-file monitor-data.json \
     --runs 30
 ```
@@ -156,12 +156,12 @@ Saved to monitor-data.json (scan #3)
 
 Quick Results:
   "best SEO tools":
-    clearscope.io  — 75% citation rate
+    acme.com  — 75% citation rate
     surferseo.com  — 60% citation rate
     semrush.com    — 85% citation rate
 
   "content optimization software":
-    clearscope.io  — 80% citation rate
+    acme.com  — 80% citation rate
     surferseo.com  — 45% citation rate
     semrush.com    — 55% citation rate
 ```
@@ -179,29 +179,29 @@ CITATION SHARE BY PROMPT:
   Competitor        Latest    Avg     Trend
   ─────────────────────────────────────────
   semrush.com        85%      80%     ↑ +10%
-  clearscope.io      75%      70%     → stable
+  acme.com      75%      70%     → stable
   surferseo.com      60%      65%     ↓ -5%
 
 "content optimization software" (3 scans):
   Competitor        Latest    Avg     Trend
   ─────────────────────────────────────────
-  clearscope.io      80%      75%     ↑ +10%
+  acme.com      80%      75%     ↑ +10%
   semrush.com        55%      60%     ↓ -10%
   surferseo.com      45%      50%     ↓ -5%
 
 OVERALL CITATION SHARE (across all prompts):
   semrush.com    — 70% avg citation rate
-  clearscope.io  — 78% avg citation rate
+  acme.com  — 78% avg citation rate
   surferseo.com  — 53% avg citation rate
 
 NOTABLE CHANGES:
-  ↑ clearscope.io gained +10% on "content optimization software"
+  ↑ acme.com gained +10% on "content optimization software"
   ↓ semrush.com dropped -10% on "content optimization software"
 
 CITED URLS:
-  clearscope.io:
-    - https://clearscope.io/blog/content-optimization (12x)
-    - https://clearscope.io/product (5x)
+  acme.com:
+    - https://acme.com/blog/content-optimization (12x)
+    - https://acme.com/product (5x)
   ...
 ```
 
@@ -220,12 +220,12 @@ The data file is append-only JSON. Each scan adds an entry:
         "best SEO tools": {
           "successful_runs": 20,
           "competitors": {
-            "clearscope.io": {
+            "acme.com": {
               "citation_rate": 75,
               "citation_count": 15,
-              "cited_urls": {"https://clearscope.io/blog/seo-tools": 10},
+              "cited_urls": {"https://acme.com/blog/seo-tools": 10},
               "mentioned": true,
-              "excerpts": ["Clearscope is a leading content optimization..."]
+              "excerpts": ["Acme is a leading content optimization..."]
             }
           },
           "other_sources": [
@@ -249,8 +249,7 @@ The data file is append-only JSON. Each scan adds an entry:
 
 ## Further Reading
 
-- [How to Influence AI Answers](https://www.clearscope.io/blog/how-to-influence-ai-answers) — the retrieval-first framework for AEO
-- [Gemini Creates More Opportunity; GPT Is Harder to Influence](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — why Gemini's search-first behavior matters
+
 
 ## Notes
 

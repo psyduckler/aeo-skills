@@ -16,82 +16,18 @@ import json
 import os
 import re
 import sys
-import time
-import urllib.request
-import urllib.error
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
 
-
-# ── Gemini API ──────────────────────────────────────────────────────────────
-
-def call_gemini(prompt: str, api_key: str, model: str) -> dict:
-    """Call Gemini API with Google Search grounding."""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-    payload = json.dumps({
-        "contents": [{"parts": [{"text": prompt}]}],
-        "tools": [{"google_search": {}}],
-    }).encode()
-    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-    for attempt in range(5):
-        try:
-            with urllib.request.urlopen(req, timeout=180) as resp:
-                return json.loads(resp.read())
-        except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt < 4:
-                wait = (2 ** attempt) + 1
-                print(f"    Rate limited, waiting {wait}s...", file=sys.stderr)
-                time.sleep(wait)
-            elif attempt < 4:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": f"HTTP {e.code}: {e.reason}"}
-        except (urllib.error.URLError, TimeoutError, OSError) as e:
-            if attempt < 4:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": str(e)}
-
-
-def extract_response_text(response: dict) -> str:
-    """Extract text from Gemini response."""
-    texts = []
-    for cand in response.get("candidates", []):
-        for part in cand.get("content", {}).get("parts", []):
-            if "text" in part:
-                texts.append(part["text"])
-    return "\n".join(texts)
-
-
-def extract_sources(response: dict) -> list:
-    """Extract grounding sources from response."""
-    sources = []
-    seen = set()
-    for cand in response.get("candidates", []):
-        meta = cand.get("groundingMetadata", {})
-        for chunk in meta.get("groundingChunks", []):
-            web = chunk.get("web", {})
-            uri = web.get("uri", "")
-            title = web.get("title", "")
-            if uri and uri not in seen:
-                seen.add(uri)
-                sources.append({"title": title, "uri": uri})
-    return sources
-
-
-def get_domain(uri: str) -> str:
-    """Extract clean domain from URI."""
-    try:
-        parsed = urlparse(uri)
-        domain = parsed.netloc.lower()
-        if domain.startswith("www."):
-            domain = domain[4:]
-        return domain
-    except Exception:
-        return ""
+# ── Shared imports ──────────────────────────────────────────────────────────
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from shared.gemini_client import (
+    call_gemini, extract_response_text, extract_sources, extract_domain,
+    domain_matches, get_api_key,
+    DEFAULT_MODEL, DEFAULT_RUNS, DEFAULT_CONCURRENCY,
+)
 
 
 def find_domain_mentions(text: str, domain: str) -> list:
@@ -152,7 +88,6 @@ def scan_prompt(prompt: str, competitors: list, runs: int, model: str,
 
     successful_runs = len(run_results)
 
-    # Track each competitor
     competitor_data = {}
     for comp in competitors:
         comp_clean = comp.lower()
@@ -165,16 +100,14 @@ def scan_prompt(prompt: str, competitors: list, runs: int, model: str,
         all_excerpts = []
 
         for run in run_results:
-            # Check citations
             cited_in_run = False
             for source in run["sources"]:
-                if comp_clean in get_domain(source["uri"]):
+                if comp_clean in extract_domain(source["uri"]):
                     cited_in_run = True
                     cited_urls[source["uri"]] += 1
             if cited_in_run:
                 citation_count += 1
 
-            # Check mentions
             excerpts = find_domain_mentions(run["text"], comp_clean)
             if excerpts:
                 mention_count += 1
@@ -191,13 +124,12 @@ def scan_prompt(prompt: str, competitors: list, runs: int, model: str,
             "excerpts": unique_excerpts,
         }
 
-    # Track other (non-competitor) sources
     all_domains = defaultdict(int)
     comp_set = {c.lower().replace("www.", "") for c in competitors}
     for run in run_results:
         seen = set()
         for source in run["sources"]:
-            d = get_domain(source["uri"])
+            d = extract_domain(source["uri"])
             if d not in comp_set and d not in seen:
                 all_domains[d] += 1
                 seen.add(d)
@@ -217,10 +149,7 @@ def scan_prompt(prompt: str, competitors: list, runs: int, model: str,
 
 def cmd_scan(args):
     """Run a competitive scan."""
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("Error: GEMINI_API_KEY environment variable required", file=sys.stderr)
-        sys.exit(1)
+    api_key = get_api_key()
 
     data = load_data(args.data_file)
 
@@ -236,7 +165,6 @@ def cmd_scan(args):
         )
         scan_results[prompt] = result
 
-    # Save scan
     scan_entry = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "model": args.model,
@@ -251,7 +179,6 @@ def cmd_scan(args):
     print(f"\nScan complete: {len(args.prompts)} prompts × {args.runs} runs", file=sys.stderr)
     print(f"Saved to {args.data_file} (scan #{scan_num})", file=sys.stderr)
 
-    # Print quick summary
     print(f"\nQuick Results:")
     for prompt, result in scan_results.items():
         print(f"  \"{prompt}\":")
@@ -273,14 +200,12 @@ def cmd_report(args):
         print("No scan data found.", file=sys.stderr)
         sys.exit(1)
 
-    # Collect all prompts and competitors across scans
     all_prompts = set()
     all_competitors = set()
     for scan in scans:
         all_prompts.update(scan["results"].keys())
         all_competitors.update(scan.get("competitors_tracked", []))
 
-    # Calculate per-prompt, per-competitor trends
     prompt_trends = {}
     for prompt in sorted(all_prompts):
         comp_history = defaultdict(list)
@@ -296,7 +221,6 @@ def cmd_report(args):
                     })
         prompt_trends[prompt] = dict(comp_history)
 
-    # Calculate overall averages
     overall = defaultdict(list)
     latest_scan = scans[-1]
     for prompt, result in latest_scan["results"].items():
@@ -308,7 +232,6 @@ def cmd_report(args):
         for comp, rates in overall.items()
     }
 
-    # Determine date range
     first_date = scans[0]["timestamp"][:10]
     last_date = scans[-1]["timestamp"][:10]
     try:
@@ -340,7 +263,6 @@ def format_report_text(report: dict, scans: list) -> str:
     lines.append(f"Data: {report['data_file']} ({report['total_scans']} scans, {dr['days']} days)")
     lines.append("=" * 64)
 
-    # Per-prompt breakdown
     lines.append("")
     lines.append("CITATION SHARE BY PROMPT:")
 
@@ -359,7 +281,6 @@ def format_report_text(report: dict, scans: list) -> str:
             latest = entries[-1]["citation_rate"]
             avg = round(sum(e["citation_rate"] for e in entries) / len(entries))
 
-            # Trend: compare latest to first
             if len(entries) >= 2:
                 diff = latest - entries[0]["citation_rate"]
                 if diff > 5:
@@ -373,13 +294,11 @@ def format_report_text(report: dict, scans: list) -> str:
 
             lines.append(f"  {comp:<25s} {latest:>7d}% {avg:>7d}% {trend:>10s}")
 
-    # Overall
     lines.append("")
     lines.append("OVERALL CITATION SHARE (across all prompts):")
     for comp, avg in sorted(report["overall_avg"].items(), key=lambda x: -x[1]):
         lines.append(f"  {comp:<25s} — {avg}% avg citation rate")
 
-    # Notable changes
     lines.append("")
     lines.append("NOTABLE CHANGES:")
     changes_found = False
@@ -394,7 +313,6 @@ def format_report_text(report: dict, scans: list) -> str:
     if not changes_found:
         lines.append("  No significant changes (±10%) since last scan")
 
-    # Cited URLs from latest scan
     lines.append("")
     lines.append("CITED URLS (latest scan):")
     latest = scans[-1]
@@ -436,8 +354,6 @@ def check_alerts(data: dict, config: dict) -> list:
 
     for alert in alerts_config:
         alert_type = alert.get("type", "")
-
-        # Determine which prompts to check
         target_prompt = alert.get("prompt", "*")
         prompts_to_check = []
         if target_prompt == "*":
@@ -445,7 +361,7 @@ def check_alerts(data: dict, config: dict) -> list:
         elif target_prompt in latest["results"]:
             prompts_to_check = [target_prompt]
         else:
-            continue  # prompt not found in latest scan
+            continue
 
         if alert_type == "competitor_above":
             domain = alert.get("domain", "")
@@ -487,23 +403,18 @@ def check_alerts(data: dict, config: dict) -> list:
             if not previous:
                 continue
             for prompt in prompts_to_check:
-                # Calculate position from source order in latest vs previous
                 latest_result = latest["results"].get(prompt, {})
                 prev_result = previous["results"].get(prompt, {})
                 if not latest_result or not prev_result:
                     continue
 
-                # Get citation position from other_sources + competitors
                 def get_position(scan_result, target_domain):
-                    """Get domain position in citation ranking (1-indexed)."""
                     all_domains = []
-                    # Collect all domains with citation rates
                     for comp, cdata in scan_result.get("competitors", {}).items():
                         comp_clean = comp.lower().replace("www.", "")
                         all_domains.append((comp_clean, cdata.get("citation_rate", 0)))
                     for src in scan_result.get("other_sources", []):
                         all_domains.append((src["domain"], src.get("citation_rate", 0)))
-                    # Sort by citation rate desc
                     all_domains.sort(key=lambda x: -x[1])
                     target_clean = target_domain.lower().replace("www.", "")
                     for idx, (d, _) in enumerate(all_domains):
@@ -515,7 +426,7 @@ def check_alerts(data: dict, config: dict) -> list:
                 prev_pos = get_position(prev_result, domain)
 
                 if latest_pos is not None and prev_pos is not None:
-                    drop = latest_pos - prev_pos  # positive = worse position
+                    drop = latest_pos - prev_pos
                     if drop >= positions:
                         triggered.append({
                             "type": "position_drop",
@@ -537,14 +448,12 @@ def check_alerts(data: dict, config: dict) -> list:
                 if not latest_result or not prev_result:
                     continue
 
-                # Collect all domains from previous scan
                 prev_domains = set()
                 for comp in prev_result.get("competitors", {}).keys():
                     prev_domains.add(comp.lower().replace("www.", ""))
                 for src in prev_result.get("other_sources", []):
                     prev_domains.add(src["domain"].lower().replace("www.", ""))
 
-                # Check for new domains in latest scan
                 for comp, cdata in latest_result.get("competitors", {}).items():
                     comp_clean = comp.lower().replace("www.", "")
                     rate = cdata.get("citation_rate", 0)
@@ -620,7 +529,6 @@ def main():
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    # Scan subcommand
     scan_parser = subparsers.add_parser("scan", help="Run a competitive scan")
     scan_parser.add_argument("--prompts", nargs="+", required=True,
                              help="Prompts to scan")
@@ -628,21 +536,19 @@ def main():
                              help="Competitor domains to track")
     scan_parser.add_argument("--data-file", default="monitor-data.json",
                              help="Data file path (default: monitor-data.json)")
-    scan_parser.add_argument("--runs", type=int, default=20,
+    scan_parser.add_argument("--runs", type=int, default=DEFAULT_RUNS,
                              help="Runs per prompt (default: 20)")
-    scan_parser.add_argument("--model", default="gemini-3-flash-preview",
+    scan_parser.add_argument("--model", default=DEFAULT_MODEL,
                              help="Gemini model (default: gemini-3-flash-preview)")
-    scan_parser.add_argument("--concurrency", type=int, default=5,
+    scan_parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
                              help="Max concurrent requests (default: 5)")
 
-    # Report subcommand
     report_parser = subparsers.add_parser("report", help="Generate comparison report")
     report_parser.add_argument("--data-file", default="monitor-data.json",
                                help="Data file path (default: monitor-data.json)")
     report_parser.add_argument("--output", choices=["text", "json"], default="text",
                                help="Output format (default: text)")
 
-    # Alerts subcommand
     alerts_parser = subparsers.add_parser("alerts", help="Check data against alert thresholds")
     alerts_parser.add_argument("--data-file", default="monitor-data.json",
                                help="Data file path (default: monitor-data.json)")

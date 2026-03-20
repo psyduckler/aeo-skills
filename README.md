@@ -150,19 +150,19 @@ Each skill has a `SKILL.md` with full instructions. Drop them into your agent's 
 
 ```bash
 # Install via ClawHub
-clawhub install clearscope/aeo-prompt-research-free
-clawhub install clearscope/aeo-content-free
-clawhub install clearscope/aeo-analytics-free
-clawhub install clearscope/aeo-ai-overview-simulator
-clawhub install clearscope/aeo-citation-gap-finder
-clawhub install clearscope/aeo-grounding-query-mapper
-clawhub install clearscope/aeo-competitor-monitor
-clawhub install clearscope/aeo-schema-optimizer
-clawhub install clearscope/aeo-source-authority-profiler
-clawhub install clearscope/aeo-cannibalization-detector
-clawhub install clearscope/aeo-freshness-decay-tracker
-clawhub install clearscope/aeo-entity-extractor
-clawhub install clearscope/aeo-multi-prompt-strategy
+clawhub install psyduckler/aeo-prompt-research-free
+clawhub install psyduckler/aeo-content-free
+clawhub install psyduckler/aeo-analytics-free
+clawhub install psyduckler/aeo-ai-overview-simulator
+clawhub install psyduckler/aeo-citation-gap-finder
+clawhub install psyduckler/aeo-grounding-query-mapper
+clawhub install psyduckler/aeo-competitor-monitor
+clawhub install psyduckler/aeo-schema-optimizer
+clawhub install psyduckler/aeo-source-authority-profiler
+clawhub install psyduckler/aeo-cannibalization-detector
+clawhub install psyduckler/aeo-freshness-decay-tracker
+clawhub install psyduckler/aeo-entity-extractor
+clawhub install psyduckler/aeo-multi-prompt-strategy
 ```
 
 ### Other Frameworks

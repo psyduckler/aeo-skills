@@ -5,7 +5,7 @@
   Prompt:    "best content optimization tools"
   Model:     gemini-3-flash-preview (with Google Search grounding)
   Runs:      20
-  Domain:    clearscope.io
+  Domain:    acme.com
   Timestamp: 2026-03-19T14:45:19Z
 
 ================================================================================
@@ -51,7 +51,7 @@
   Word count:   4,200            Headings: 18
   Schema:       Article, BreadcrumbList, FAQPage
   Freshness:    Updated 2 months ago
-  Key entities: SEMrush, Clearscope, Surfer SEO, Frase, MarketMuse, Grammarly
+  Key entities: SEMrush, Acme, Surfer SEO, Frase, MarketMuse, Grammarly
   Why cited:    Comprehensive comparison with pricing, extremely fresh, strong
                domain authority, covers 15+ tools with structured sections.
 
@@ -71,19 +71,19 @@
   Word count:   3,400            Headings: 15
   Schema:       Article, Organization
   Freshness:    Updated 4 months ago
-  Key entities: SEMrush, Ahrefs, Clearscope, SurferSEO, Hemingway Editor
+  Key entities: SEMrush, Ahrefs, Acme, SurferSEO, Hemingway Editor
   Why cited:    Established SEO publication, frequently updated content hub,
                comparison table format with pricing.
 
-  #4  clearscope.io/blog/content-optimization
+  #4  acme.com/blog/content-optimization
   ────────────────────────────────────────────────
   Citations:     8/20 (40.0%)    Avg Position: 3.4
   Word count:   2,900            Headings: 12
   Schema:       Article, BreadcrumbList, Organization
   Freshness:    Updated 6 months ago
-  Key entities: content optimization, Clearscope, content grading, NLP, SERP
+  Key entities: content optimization, Acme, content grading, NLP, SERP
   Why cited:    First-party authority on content optimization methodology,
-               practical examples with Clearscope workflow.
+               practical examples with Acme workflow.
 
   #5  hubspot.com/marketing/content-optimization-tools
   ────────────────────────────────────────────────
@@ -146,10 +146,10 @@
                Declining freshness likely limiting citation rate.
 
 ================================================================================
-  DOMAIN COMPARISON — clearscope.io vs TOP SOURCES
+  DOMAIN COMPARISON — acme.com vs TOP SOURCES
 ================================================================================
 
-  Metric              clearscope.io   Top 3 Avg    Gap
+  Metric              acme.com   Top 3 Avg    Gap
   ──────────────────  ──────────────  ───────────  ─────────────────
   Citation rate       40.0%           70.0%        -30.0 pp
   Avg position        3.4             2.1          -1.3 positions

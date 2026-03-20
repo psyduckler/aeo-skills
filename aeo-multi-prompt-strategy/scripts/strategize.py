@@ -13,72 +13,16 @@ Requires: GEMINI_API_KEY env var
 import argparse
 import json
 import os
-import re
 import sys
-import time
-import urllib.request
-import urllib.error
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from urllib.parse import urlparse
 
-
-# ── Gemini API ──────────────────────────────────────────────────────────────
-
-def call_gemini(prompt: str, api_key: str, model: str) -> dict:
-    """Call Gemini API with Google Search grounding."""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-    payload = json.dumps({
-        "contents": [{"parts": [{"text": prompt}]}],
-        "tools": [{"google_search": {}}],
-    }).encode()
-    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-    for attempt in range(5):
-        try:
-            with urllib.request.urlopen(req, timeout=180) as resp:
-                return json.loads(resp.read())
-        except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt < 4:
-                wait = (2 ** attempt) + 1
-                print(f"    Rate limited, waiting {wait}s...", file=sys.stderr)
-                time.sleep(wait)
-            elif attempt < 4:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": f"HTTP {e.code}: {e.reason}"}
-        except (urllib.error.URLError, TimeoutError, OSError) as e:
-            if attempt < 4:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": str(e)}
-
-
-def extract_sources(response: dict) -> list:
-    """Extract grounding source URLs and titles from Gemini response."""
-    sources = []
-    seen = set()
-    for cand in response.get("candidates", []):
-        meta = cand.get("groundingMetadata", {})
-        for chunk in meta.get("groundingChunks", []):
-            web = chunk.get("web", {})
-            uri = web.get("uri", "")
-            title = web.get("title", "")
-            if uri and uri not in seen:
-                seen.add(uri)
-                sources.append({"title": title, "uri": uri})
-    return sources
-
-
-def get_domain(uri: str) -> str:
-    """Extract clean domain from URI."""
-    try:
-        parsed = urlparse(uri)
-        domain = parsed.netloc.lower()
-        if domain.startswith("www."):
-            domain = domain[4:]
-        return domain
-    except Exception:
-        return ""
+# ── Shared imports ──────────────────────────────────────────────────────────
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from shared.gemini_client import (
+    call_gemini, extract_sources, extract_domain, get_api_key,
+    DEFAULT_MODEL, DEFAULT_RUNS, DEFAULT_CONCURRENCY,
+)
 
 
 # ── Core Logic ──────────────────────────────────────────────────────────────
@@ -112,7 +56,6 @@ def scan_prompt(prompt: str, runs: int, model: str, concurrency: int,
     if successful_runs == 0:
         return {"successful_runs": 0, "errors": errors, "urls": {}, "domains": {}}
 
-    # Count URL and domain citations
     url_cite_count = defaultdict(int)
     url_titles = {}
     domain_cite_count = defaultdict(int)
@@ -122,7 +65,7 @@ def scan_prompt(prompt: str, runs: int, model: str, concurrency: int,
         seen_urls = set()
         for src in sources:
             uri = src["uri"]
-            d = get_domain(uri)
+            d = extract_domain(uri)
 
             if uri not in seen_urls:
                 url_cite_count[uri] += 1
@@ -139,7 +82,7 @@ def scan_prompt(prompt: str, runs: int, model: str, concurrency: int,
             "citation_rate": round(count / successful_runs * 100),
             "citation_count": count,
             "title": url_titles.get(url, ""),
-            "domain": get_domain(url),
+            "domain": extract_domain(url),
         }
         for url, count in url_cite_count.items()
     }
@@ -163,17 +106,13 @@ def scan_prompt(prompt: str, runs: int, model: str, concurrency: int,
 def run_strategy(prompts: list, runs: int, model: str, concurrency: int,
                  domain: str = None):
     """Run all prompts and build cross-prompt strategy analysis."""
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("Error: GEMINI_API_KEY environment variable required", file=sys.stderr)
-        sys.exit(1)
+    api_key = get_api_key()
 
     print(f"Multi-Prompt Strategy", file=sys.stderr)
     print(f"Prompts: {len(prompts)} | Model: {model} | Runs per prompt: {runs}", file=sys.stderr)
     if domain:
         print(f"Domain focus: {domain}", file=sys.stderr)
 
-    # Scan each prompt
     prompt_results = {}
     for prompt in prompts:
         result = scan_prompt(prompt, runs, model, concurrency, api_key)
@@ -181,7 +120,6 @@ def run_strategy(prompts: list, runs: int, model: str, concurrency: int,
 
     total_prompts = len(prompts)
 
-    # Build cross-prompt matrix: URL -> which prompts cite it
     url_prompt_map = defaultdict(lambda: {"prompts": {}, "title": "", "domain": ""})
     domain_prompt_map = defaultdict(lambda: {"prompts": {}})
 
@@ -195,7 +133,6 @@ def run_strategy(prompts: list, runs: int, model: str, concurrency: int,
         for d, data in result["domains"].items():
             domain_prompt_map[d]["prompts"][prompt] = data["citation_rate"]
 
-    # Identify authority hubs (URLs cited for 2+ prompts)
     authority_hubs = []
     for url, data in url_prompt_map.items():
         prompt_count = len(data["prompts"])
@@ -214,7 +151,6 @@ def run_strategy(prompts: list, runs: int, model: str, concurrency: int,
 
     authority_hubs.sort(key=lambda x: (-x["prompts_cited"], -x["avg_citation_rate"]))
 
-    # Domain-level cross-prompt presence
     domain_hubs = []
     for d, data in domain_prompt_map.items():
         prompt_count = len(data["prompts"])
@@ -231,13 +167,12 @@ def run_strategy(prompts: list, runs: int, model: str, concurrency: int,
 
     domain_hubs.sort(key=lambda x: (-x["prompts_cited"], -x["avg_citation_rate"]))
 
-    # Single-prompt winners (URLs cited for only 1 prompt but at high rate)
     single_winners = []
     for url, data in url_prompt_map.items():
         if len(data["prompts"]) == 1:
             prompt_name = list(data["prompts"].keys())[0]
             rate = list(data["prompts"].values())[0]
-            if rate >= 30:  # Only notable single-prompt winners
+            if rate >= 30:
                 single_winners.append({
                     "url": url,
                     "title": data["title"],
@@ -248,7 +183,6 @@ def run_strategy(prompts: list, runs: int, model: str, concurrency: int,
 
     single_winners.sort(key=lambda x: -x["citation_rate"])
 
-    # Domain-specific analysis
     domain_analysis = None
     if domain:
         target = domain.lower()
@@ -258,14 +192,12 @@ def run_strategy(prompts: list, runs: int, model: str, concurrency: int,
         my_hubs = [h for h in authority_hubs if target in h["domain"]]
         my_singles = [s for s in single_winners if target in s["domain"]]
 
-        # Prompts where domain is absent
         absent_prompts = []
         for prompt, result in prompt_results.items():
             domain_cited = any(target in d for d in result["domains"].keys())
             if not domain_cited:
                 absent_prompts.append(prompt)
 
-        # Strategy recommendations
         recommendations = []
 
         if my_hubs:
@@ -285,7 +217,6 @@ def run_strategy(prompts: list, runs: int, model: str, concurrency: int,
 
         if my_singles and my_hubs:
             for s in my_singles[:3]:
-                # Check if any hub covers a similar topic
                 recommendations.append(
                     f"Single-prompt winner ({s['url']}) only wins \"{s['prompt']}\" — "
                     f"consider expanding a hub page to also cover this prompt."
@@ -346,7 +277,6 @@ def format_text(result: dict) -> str:
     lines.append(f"Prompts analyzed: {result['total_prompts']}")
     lines.append("")
 
-    # Per-prompt summary
     lines.append("PER-PROMPT TOP DOMAINS:")
     lines.append("=" * 70)
     for prompt, data in result["prompt_results"].items():
@@ -354,7 +284,6 @@ def format_text(result: dict) -> str:
         for d in data["top_domains"]:
             lines.append(f"    {d['citation_rate']}% — {d['domain']}")
 
-    # Authority Hubs (URL-level)
     if result["authority_hubs"]:
         lines.append("")
         lines.append("AUTHORITY HUB PAGES (cited for 2+ prompts):")
@@ -372,7 +301,6 @@ def format_text(result: dict) -> str:
         lines.append("")
         lines.append("No authority hub pages found (no URL cited for 2+ prompts).")
 
-    # Domain Hubs
     if result["domain_hubs"]:
         lines.append("")
         lines.append("AUTHORITY HUB DOMAINS (present for 2+ prompts):")
@@ -381,7 +309,6 @@ def format_text(result: dict) -> str:
             prompts_str = f"{hub['prompts_cited']}/{hub['total_prompts']} prompts"
             lines.append(f"  {hub['hub_score']:3d}% — {hub['domain']} ({prompts_str}, avg {hub['avg_citation_rate']}%)")
 
-    # Single-prompt winners
     if result["single_prompt_winners"]:
         lines.append("")
         lines.append("SINGLE-PROMPT WINNERS (high rate, but only one prompt):")
@@ -390,7 +317,6 @@ def format_text(result: dict) -> str:
             lines.append(f"  {sw['citation_rate']}% — {sw['domain']}: {sw['url']}")
             lines.append(f"         Only wins: \"{sw['prompt']}\"")
 
-    # Domain analysis
     da = result.get("domain_analysis")
     if da:
         lines.append("")
@@ -434,17 +360,16 @@ def main():
                         help="File with one prompt per line (combined with positional)")
     parser.add_argument("--domain",
                         help="Domain to analyze (e.g., example.com)")
-    parser.add_argument("--runs", type=int, default=20,
+    parser.add_argument("--runs", type=int, default=DEFAULT_RUNS,
                         help="Runs per prompt (default: 20)")
-    parser.add_argument("--model", default="gemini-3-flash-preview",
+    parser.add_argument("--model", default=DEFAULT_MODEL,
                         help="Gemini model (default: gemini-3-flash-preview)")
-    parser.add_argument("--concurrency", type=int, default=5,
+    parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
                         help="Max concurrent requests (default: 5)")
     parser.add_argument("--output", choices=["text", "json"], default="text",
                         help="Output format (default: text)")
     args = parser.parse_args()
 
-    # Collect prompts
     all_prompts = list(args.prompts) if args.prompts else []
     if args.prompts_file:
         try:

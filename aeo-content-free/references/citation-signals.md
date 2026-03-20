@@ -63,7 +63,7 @@ AI models match content to queries partly through named entities — specific to
 - Use precise numbers over vague claims
 
 **Don't:**
-- Say "many tools" when you can say "tools like Clearscope, Surfer SEO, and MarketMuse"
+- Say "many tools" when you can say "tools like Ahrefs, Surfer SEO, and MarketMuse"
 - Say "studies show" without citing the study
 - Use generic descriptions when specific names exist
 

@@ -9,7 +9,7 @@ Run a prompt N times against Gemini with Google Search grounding enabled. Collec
 
 **Why Gemini 3 Flash?** This is the model that powers Google Search AI Mode and AI Overviews — the most important answer engine for AEO. Running prompts through Gemini 3 Flash with grounding simulates what Google's AI actually does when users ask questions. 20 samples provides reliable frequency distribution for directional insights.
 
-**The Retrieval Framework:** [Influence happens at retrieval, not inside the model.](https://www.clearscope.io/blog/how-to-influence-ai-answers) You can't edit a model's training data — but you can enter the "candidate set" the model selects from when it searches the web. Gemini is search-first: it fires real Google Search queries before nearly every answer, making it [more influenceable than GPT](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence). This tool reveals the **recurring retrieval set** — the queries, sources, and themes Gemini consistently draws from. Understanding query frequency is the first step to entering that set.
+**The Retrieval Framework:** Influence happens at retrieval, not inside the model. You can't edit a model's training data — but you can enter the "candidate set" the model selects from when it searches the web. Gemini is search-first: it fires real Google Search queries before nearly every answer, making it more influenceable than GPT. This tool reveals the **recurring retrieval set** — the queries, sources, and themes Gemini consistently draws from. Understanding query frequency is the first step to entering that set.
 
 ## Usage
 
@@ -67,8 +67,7 @@ If 60% of queries are commercial, the model is searching for comparison content 
 
 ## Further Reading
 
-- [How to Influence AI Answers](https://www.clearscope.io/blog/how-to-influence-ai-answers) — the retrieval-first framework for AEO
-- [Gemini Creates More Opportunity; GPT Is Harder to Influence](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — why Gemini's search-first behavior matters
+
 
 ## Notes
 

@@ -23,7 +23,7 @@
   18/20   90.0%  Google (Search Console / Analytics)
   15/20   75.0%  Moz
   11/20   55.0%  HubSpot
-   9/20   45.0%  Clearscope
+   9/20   45.0%  Acme
    8/20   40.0%  Surfer SEO
    7/20   35.0%  Yoast
    6/20   30.0%  Screaming Frog
@@ -75,7 +75,7 @@
    4/20   20.0%  "67% of all clicks go to the top 5 results"
    3/20   15.0%  "SEMrush pricing starts at $139.95/month"
    2/20   10.0%  "Ahrefs starts at $129/month"
-   2/20   10.0%  "Clearscope pricing starts at $189/month"
+   2/20   10.0%  "Acme pricing starts at $189/month"
 
   ─── CONCEPTS / METHODOLOGIES ──────────────────────────────────────────────────
 
@@ -115,7 +115,7 @@
     ✅ keyword research, backlink analysis, site audit
 
   Should-include entities (40-80% — frequently referenced):
-    ✅ Moz, HubSpot, Clearscope, Surfer SEO
+    ✅ Moz, HubSpot, Acme, Surfer SEO
     ✅ rank tracking, competitor analysis, content optimization
     ✅ Brian Dean, Neil Patel
 

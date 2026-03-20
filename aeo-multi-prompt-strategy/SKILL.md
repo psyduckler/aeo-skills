@@ -20,9 +20,9 @@ Find authority hub pages that enter the recurring retrieval set for multiple que
 
 ## Background
 
-[Influence over AI answers compounds through repeated inclusion](https://www.clearscope.io/blog/how-to-influence-ai-answers) in the **recurring retrieval set**. But the most powerful form of authority isn't being cited for one prompt — it's being cited for *many*. When a single page enters the candidate set for 5 different prompts, it becomes an **authority hub**: the model has learned to retrieve it across diverse query patterns.
+Influence over AI answers compounds through repeated inclusion in the **recurring retrieval set**. But the most powerful form of authority isn't being cited for one prompt — it's being cited for *many*. When a single page enters the candidate set for 5 different prompts, it becomes an **authority hub**: the model has learned to retrieve it across diverse query patterns.
 
-This matters because [Gemini generates varied, specific search queries](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — the "long long tail" of its search behavior means each prompt generates different queries, yet the same authoritative pages keep surfacing. Authority hubs exploit this: they're comprehensive enough to match multiple query patterns, creating expanding entry points across the retrieval landscape.
+This matters because Gemini generates varied, specific search queries — the "long long tail" of its search behavior means each prompt generates different queries, yet the same authoritative pages keep surfacing. Authority hubs exploit this: they're comprehensive enough to match multiple query patterns, creating expanding entry points across the retrieval landscape.
 
 In Gemini's search-first architecture, every prompt fires fresh web searches. A page that appears in the results for prompts A, B, and C is seen by the model three times as often as a page that only appears for prompt A. This repeated visibility across different retrieval contexts is what builds durable authority — not in the model's weights, but in the model's consistent retrieval behavior.
 
@@ -55,11 +55,11 @@ GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
     "best content optimization tools" \
     "how to optimize content for SEO" \
     "content optimization software comparison" \
-    --domain clearscope.io
+    --domain acme.com
 
 # Load prompts from file
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/strategize.py --prompts-file my-prompts.txt --domain clearscope.io
+  python3 scripts/strategize.py --prompts-file my-prompts.txt --domain acme.com
 
 # JSON output
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
@@ -95,24 +95,24 @@ PER-PROMPT TOP DOMAINS:
 ======================================================================
 
   "best content optimization tools" (20 runs):
-    85% — clearscope.io
+    85% — acme.com
     70% — surferseo.com
     55% — semrush.com
 
   "how to optimize content for SEO" (20 runs):
-    75% — clearscope.io
+    75% — acme.com
     65% — searchenginejournal.com
     50% — moz.com
 
   "content optimization software comparison" (20 runs):
     80% — g2.com
-    70% — clearscope.io
+    70% — acme.com
     55% — surferseo.com
 
 AUTHORITY HUB PAGES (cited for 2+ prompts):
 ======================================================================
 
-  🏆 https://clearscope.io/blog/content-optimization-guide
+  🏆 https://acme.com/blog/content-optimization-guide
      Title: The Complete Guide to Content Optimization
      Hub score: 100% (3/3 prompts)
      Avg citation rate: 77%
@@ -128,7 +128,7 @@ AUTHORITY HUB PAGES (cited for 2+ prompts):
 
 AUTHORITY HUB DOMAINS (present for 2+ prompts):
 ======================================================================
-  100% — clearscope.io (3/3 prompts, avg 77%)
+  100% — acme.com (3/3 prompts, avg 77%)
    67% — surferseo.com (2/3 prompts, avg 63%)
    67% — semrush.com (2/3 prompts, avg 45%)
 
@@ -137,10 +137,10 @@ SINGLE-PROMPT WINNERS (high rate, but only one prompt):
   80% — g2.com: https://g2.com/categories/content-optimization
          Only wins: "content optimization software comparison"
 
-DOMAIN STRATEGY: clearscope.io
+DOMAIN STRATEGY: acme.com
 ======================================================================
   Authority hub pages (1):
-    🏆 https://clearscope.io/blog/content-optimization-guide
+    🏆 https://acme.com/blog/content-optimization-guide
        3/3 prompts, avg 77%
   Single-prompt winners: None
   Not cited for (0 prompts)
@@ -185,8 +185,7 @@ Structured JSON with `authority_hubs`, `domain_hubs`, `single_prompt_winners`, c
 
 ## References
 
-- [How to Influence AI Answers](https://www.clearscope.io/blog/how-to-influence-ai-answers) — The recurring retrieval set and compounding influence
-- [Gemini Creates More Opportunity; GPT Is Harder to Influence](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — The long tail of search queries and why hub pages win
+
 
 ## Notes
 

@@ -35,7 +35,7 @@ No paid tools or accounts required for core functionality.
 ### Input
 
 The user provides:
-- **Domain URL** (required) — e.g. `clearscope.io`
+- **Domain URL** (required) — e.g. `acme.com`
 - **Niche/category** (optional) — e.g. "SEO software for content teams"
 - **Competitors** (optional) — e.g. "Surfer SEO, MarketMuse, Frase"
 

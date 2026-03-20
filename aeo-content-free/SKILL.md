@@ -22,7 +22,7 @@ Create or refresh content that AI assistants want to cite — using zero paid AP
 
 ## Context: Why This Matters Now
 
-Google's AI Overviews and Search AI Mode are powered by **Gemini 3 Flash** — the model that decides which sources get cited when users ask questions. [Influence happens at retrieval, not inside the model](https://www.clearscope.io/blog/how-to-influence-ai-answers) — you can't edit training data, but you can enter the "candidate set" the model selects from when it searches the web. [Gemini is search-first](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence), searching before nearly every answer, which means creating the right content can get you into the **recurring retrieval set** — the sources the model consistently draws from. Influence compounds through repeated inclusion.
+Google's AI Overviews and Search AI Mode are powered by **Gemini 3 Flash** — the model that decides which sources get cited when users ask questions. Influence happens at retrieval, not inside the model — you can't edit training data, but you can enter the "candidate set" the model selects from when it searches the web. Gemini is search-first, searching before nearly every answer, which means creating the right content can get you into the **recurring retrieval set** — the sources the model consistently draws from. Influence compounds through repeated inclusion.
 
 ## Requirements
 
@@ -208,5 +208,4 @@ Deliver with the same publishing guidance as Create Step 5.
 
 ## Further Reading
 
-- [How to Influence AI Answers](https://www.clearscope.io/blog/how-to-influence-ai-answers) — the retrieval-first framework for AEO
-- [Gemini Creates More Opportunity; GPT Is Harder to Influence](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — why Gemini's search-first behavior matters
+

@@ -4,7 +4,7 @@
 
   Prompts:   "best seo tools"
              "how to optimize content for ai"
-  Domain:    clearscope.io
+  Domain:    acme.com
   Model:     gemini-3-flash-preview (with Google Search grounding)
   Runs:      20 per prompt (40 total)
   Timestamp: 2026-03-19T15:18:55Z
@@ -25,11 +25,11 @@
      3    backlinko.com                  13/20      65.0%    2.9
      4    moz.com                        11/20      55.0%    3.4
      5    searchenginejournal.com        10/20      50.0%    3.8
-     6    clearscope.io                   7/20      35.0%    4.2
+     6    acme.com                   7/20      35.0%    4.2
      7    hubspot.com                     6/20      30.0%    5.1
      8    neilpatel.com                   5/20      25.0%    4.9
 
-  Domain Tracking (clearscope.io):
+  Domain Tracking (acme.com):
     Mention rate:   10/20 (50.0%)
     Citation rate:   7/20 (35.0%)
     Avg position:   4.2
@@ -41,7 +41,7 @@
   Top Sources:
     Rank  Domain                        Citations  Rate     Avg Pos
      1    searchenginejournal.com        15/20      75.0%    1.6
-     2    clearscope.io                  12/20      60.0%    2.3
+     2    acme.com                  12/20      60.0%    2.3
      3    hubspot.com                    10/20      50.0%    3.2
      4    contentmarketinginstitute.com   9/20      45.0%    3.5
      5    semrush.com                     8/20      40.0%    3.9
@@ -49,7 +49,7 @@
      7    surferseo.com                   6/20      30.0%    4.4
      8    ahrefs.com                      4/20      20.0%    5.2
 
-  Domain Tracking (clearscope.io):
+  Domain Tracking (acme.com):
     Mention rate:   15/20 (75.0%)
     Citation rate:  12/20 (60.0%)
     Avg position:   2.3
@@ -111,7 +111,7 @@
     1. semrush.com        — Avg citation rate 62.5% | Strong: depth, freshness
     2. searchenginejournal — Avg citation rate 62.5% | Strong: breadth, authority
     3. backlinko.com      — Avg citation rate 50.0% | Strong: editorial, visuals
-    4. clearscope.io      — Avg citation rate 47.5% | Strong: AI expertise niche
+    4. acme.com      — Avg citation rate 47.5% | Strong: AI expertise niche
     5. hubspot.com        — Avg citation rate 40.0% | Strong: schema, ecosystem
 
 ================================================================================
@@ -122,7 +122,7 @@
 
   BRANDS (by combined frequency):
     SEMrush (87.5%) | Ahrefs (75.0%) | Google (72.5%) | Moz (52.5%)
-    Clearscope (47.5%) | Surfer SEO (37.5%) | HubSpot (35.0%)
+    Acme (47.5%) | Surfer SEO (37.5%) | HubSpot (35.0%)
 
   TOOLS/FEATURES:
     keyword research (82.5%) | content optimization (67.5%)
@@ -163,7 +163,7 @@
   Domain                    Prompt 1    Prompt 2    Overlap
   ──────────────────────    ────────    ────────    ───────
   semrush.com               85.0%       40.0%       ✅ Both
-  clearscope.io             35.0%       60.0%       ✅ Both
+  acme.com             35.0%       60.0%       ✅ Both
   searchenginejournal.com   50.0%       75.0%       ✅ Both
   backlinko.com             65.0%       35.0%       ✅ Both
   hubspot.com               30.0%       50.0%       ✅ Both
@@ -176,7 +176,7 @@
     These are "hub pages" that rank for multiple AI prompt types.
 
 ================================================================================
-  SECTION 7: RECOMMENDATIONS FOR clearscope.io
+  SECTION 7: RECOMMENDATIONS FOR acme.com
 ================================================================================
 
   Overall Position:

@@ -47,16 +47,16 @@ This skill identifies those gaps so you can optimize content for cross-platform 
 # Full gap analysis with domain tracking
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
 BRAVE_API_KEY=$(security find-generic-password -s "brave-search" -w) \
-  python3 scripts/find_gaps.py "best SEO tools for content optimization" --domain clearscope.io
+  python3 scripts/find_gaps.py "best SEO tools for content optimization" --domain acme.com
 
 # Without Brave (Gemini-only analysis)
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/find_gaps.py "best SEO tools for content optimization" --domain clearscope.io
+  python3 scripts/find_gaps.py "best SEO tools for content optimization" --domain acme.com
 
 # JSON output
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
 BRAVE_API_KEY=$(security find-generic-password -s "brave-search" -w) \
-  python3 scripts/find_gaps.py "best SEO tools for content optimization" --domain clearscope.io --output json
+  python3 scripts/find_gaps.py "best SEO tools for content optimization" --domain acme.com --output json
 ```
 
 Run from the skill directory. Resolve `scripts/find_gaps.py` relative to this SKILL.md.
@@ -77,11 +77,11 @@ Run from the skill directory. Resolve `scripts/find_gaps.py` relative to this SK
 
 ```
 Citation Gap Analysis: "best SEO tools for content optimization"
-Domain: clearscope.io
+Domain: acme.com
 ================================================================
 
 GOOGLE AI CITATIONS (Gemini 3 Flash, 20 runs):
-  85% — clearscope.io
+  85% — acme.com
   70% — surferseo.com
   55% — semrush.com
   40% — ahrefs.com
@@ -89,7 +89,7 @@ GOOGLE AI CITATIONS (Gemini 3 Flash, 20 runs):
 WEB SEARCH RESULTS (Brave, top 20):
   #1 — g2.com/categories/seo-content-optimization
   #2 — surferseo.com/blog/best-seo-tools
-  #3 — clearscope.io
+  #3 — acme.com
   ...
 
 GAP ANALYSIS:
@@ -102,10 +102,10 @@ GAP ANALYSIS:
     - backlinko.com (web rank #5, 0% AI citation)
 
   Both (cross-platform authority):
-    - clearscope.io (85% AI citation, web rank #3)
+    - acme.com (85% AI citation, web rank #3)
     - surferseo.com (70% AI citation, web rank #2)
 
-DOMAIN REPORT: clearscope.io
+DOMAIN REPORT: acme.com
   Google AI: ✅ Cited in 85% of runs
   Web Search: ✅ Appears in top 20
   Status: STRONG — cross-platform visibility

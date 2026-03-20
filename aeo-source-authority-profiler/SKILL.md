@@ -22,9 +22,9 @@ Reverse-engineer WHY certain pages get cited by Gemini — and build a blueprint
 
 ## Background
 
-Influence over AI answers [happens at retrieval, not inside the model](https://www.clearscope.io/blog/how-to-influence-ai-answers). You can't edit Gemini's weights, but you can enter the **candidate set** it selects from when it searches the web. Every prompt triggers a retrieval step — Gemini fires search queries, evaluates the results, and picks sources to ground its answer. The pages it picks consistently form the **recurring retrieval set** for that topic.
+Influence over AI answers happens at retrieval, not inside the model. You can't edit Gemini's weights, but you can enter the **candidate set** it selects from when it searches the web. Every prompt triggers a retrieval step — Gemini fires search queries, evaluates the results, and picks sources to ground its answer. The pages it picks consistently form the **recurring retrieval set** for that topic.
 
-This skill profiles the pages *inside* that recurring set. By analyzing what they have in common — length, structure, schema, freshness, entity density — you get a concrete blueprint for what it takes to enter and stay in the candidate set. [Gemini's search-first architecture creates more entry points than recall-first models like GPT](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence), which means the on-page profile of cited sources matters more than ever: retrievability requires alignment with query patterns, comprehensive coverage, and structural clarity.
+This skill profiles the pages *inside* that recurring set. By analyzing what they have in common — length, structure, schema, freshness, entity density — you get a concrete blueprint for what it takes to enter and stay in the candidate set. Gemini's search-first architecture creates more entry points than recall-first models like GPT, which means the on-page profile of cited sources matters more than ever: retrievability requires alignment with query patterns, comprehensive coverage, and structural clarity.
 
 ## Why This Works
 
@@ -157,8 +157,7 @@ Structured JSON with `profiles` (per-page data), `blueprint` (aggregate pattern)
 
 ## References
 
-- [How to Influence AI Answers](https://www.clearscope.io/blog/how-to-influence-ai-answers) — The retrieval-based influence framework
-- [Gemini Creates More Opportunity; GPT Is Harder to Influence](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — Why search-first models are more permeable
+
 
 ## Notes
 

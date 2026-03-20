@@ -20,7 +20,7 @@ Map the exact search queries Gemini 3 Flash fires when answering prompts — wit
 
 ## Why This Matters
 
-When Gemini 3 Flash generates an AI Overview, it doesn't just answer from memory — it fires real Google Search queries to ground its response. [Influence happens at retrieval, not inside the model](https://www.clearscope.io/blog/how-to-influence-ai-answers) — you can't edit training data, but you can enter the "candidate set" the model selects from when it searches. Gemini is [search-first](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence): it searches before nearly every answer, making it more influenceable than GPT.
+When Gemini 3 Flash generates an AI Overview, it doesn't just answer from memory — it fires real Google Search queries to ground its response. Influence happens at retrieval, not inside the model — you can't edit training data, but you can enter the "candidate set" the model selects from when it searches. Gemini is search-first: it searches before nearly every answer, making it more influenceable than GPT.
 
 Understanding *what* it searches for reveals the **recurring retrieval set** — the queries, sources, and themes the model consistently draws from:
 

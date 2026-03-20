@@ -20,7 +20,7 @@ Simulate Google AI Overviews by running prompts through the same model that powe
 
 Google's AI Overviews and Search AI Mode are powered by Gemini 3 Flash (`gemini-3-flash-preview`). When you run a prompt through this model with `google_search` grounding enabled, you're simulating exactly what happens when a user triggers an AI Overview in Google Search. The model searches the web, selects sources, and generates a grounded answer — the same pipeline Google uses.
 
-[Influence happens at retrieval, not inside the model.](https://www.clearscope.io/blog/how-to-influence-ai-answers) You can't edit training data, but you can enter the "candidate set" the model selects from when it searches. [Gemini is search-first](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — it searches before nearly every answer, making it more influenceable than GPT. This simulator reveals the **recurring retrieval set** — the sources, themes, and response patterns the model consistently draws from.
+Influence happens at retrieval, not inside the model. You can't edit training data, but you can enter the "candidate set" the model selects from when it searches. Gemini is search-first — it searches before nearly every answer, making it more influenceable than GPT. This simulator reveals the **recurring retrieval set** — the sources, themes, and response patterns the model consistently draws from.
 
 Running 20 samples per prompt captures the probabilistic nature of AI responses. A source cited in 15/20 runs is reliably featured; one cited in 3/20 is marginal. This frequency data is far more actionable than a single snapshot.
 
@@ -172,8 +172,7 @@ Adds a `response_analysis` object with `stable_sentences`, `common_sentences`, `
 
 ## Further Reading
 
-- [How to Influence AI Answers](https://www.clearscope.io/blog/how-to-influence-ai-answers) — the retrieval-first framework for AEO
-- [Gemini Creates More Opportunity; GPT Is Harder to Influence](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — why Gemini's search-first behavior matters
+
 
 ## Notes
 

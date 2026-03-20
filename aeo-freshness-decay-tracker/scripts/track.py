@@ -15,82 +15,18 @@ import json
 import os
 import re
 import sys
-import time
-import urllib.request
-import urllib.error
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
 
-
-# ── Gemini API ──────────────────────────────────────────────────────────────
-
-def call_gemini(prompt: str, api_key: str, model: str) -> dict:
-    """Call Gemini API with Google Search grounding."""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-    payload = json.dumps({
-        "contents": [{"parts": [{"text": prompt}]}],
-        "tools": [{"google_search": {}}],
-    }).encode()
-    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-    for attempt in range(5):
-        try:
-            with urllib.request.urlopen(req, timeout=180) as resp:
-                return json.loads(resp.read())
-        except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt < 4:
-                wait = (2 ** attempt) + 1
-                print(f"    Rate limited, waiting {wait}s...", file=sys.stderr)
-                time.sleep(wait)
-            elif attempt < 4:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": f"HTTP {e.code}: {e.reason}"}
-        except (urllib.error.URLError, TimeoutError, OSError) as e:
-            if attempt < 4:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": str(e)}
-
-
-def extract_response_text(response: dict) -> str:
-    """Extract text from Gemini response."""
-    texts = []
-    for cand in response.get("candidates", []):
-        for part in cand.get("content", {}).get("parts", []):
-            if "text" in part:
-                texts.append(part["text"])
-    return "\n".join(texts)
-
-
-def extract_sources(response: dict) -> list:
-    """Extract grounding sources from response."""
-    sources = []
-    seen = set()
-    for cand in response.get("candidates", []):
-        meta = cand.get("groundingMetadata", {})
-        for chunk in meta.get("groundingChunks", []):
-            web = chunk.get("web", {})
-            uri = web.get("uri", "")
-            title = web.get("title", "")
-            if uri and uri not in seen:
-                seen.add(uri)
-                sources.append({"title": title, "uri": uri})
-    return sources
-
-
-def get_domain(uri: str) -> str:
-    """Extract clean domain from URI."""
-    try:
-        parsed = urlparse(uri)
-        domain = parsed.netloc.lower()
-        if domain.startswith("www."):
-            domain = domain[4:]
-        return domain
-    except Exception:
-        return ""
+# ── Shared imports ──────────────────────────────────────────────────────────
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from shared.gemini_client import (
+    call_gemini, extract_response_text, extract_sources, extract_domain,
+    domain_matches, get_api_key,
+    DEFAULT_MODEL, DEFAULT_RUNS, DEFAULT_CONCURRENCY,
+)
 
 
 def find_domain_mentions(text: str, domain: str) -> bool:
@@ -103,7 +39,6 @@ def find_domain_mentions(text: str, domain: str) -> bool:
 # ── Data File ──────────────────────────────────────────────────────────────
 
 def load_data(data_file: str) -> dict:
-    """Load or initialize the data file."""
     if os.path.exists(data_file):
         with open(data_file) as f:
             return json.load(f)
@@ -111,7 +46,6 @@ def load_data(data_file: str) -> dict:
 
 
 def save_data(data: dict, data_file: str):
-    """Save data file (append-only — never deletes past scans)."""
     Path(data_file).parent.mkdir(parents=True, exist_ok=True)
     with open(data_file, "w") as f:
         json.dump(data, f, indent=2)
@@ -158,14 +92,12 @@ def scan_prompt(prompt: str, domain: str, runs: int, model: str,
     cited_urls = defaultdict(int)
 
     for run in run_results:
-        # Mentions in text
         if find_domain_mentions(run["text"], target):
             mention_count += 1
 
-        # Citations in sources
         cited_in_run = False
         for src in run["sources"]:
-            if target in get_domain(src["uri"]):
+            if target in extract_domain(src["uri"]):
                 cited_in_run = True
                 cited_urls[src["uri"]] += 1
         if cited_in_run:
@@ -184,12 +116,8 @@ def scan_prompt(prompt: str, domain: str, runs: int, model: str,
 
 def cmd_scan(args):
     """Run a freshness scan and append results."""
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("Error: GEMINI_API_KEY environment variable required", file=sys.stderr)
-        sys.exit(1)
+    api_key = get_api_key()
 
-    # Collect prompts
     prompts = list(args.prompts) if args.prompts else []
     if args.prompts_file:
         try:
@@ -231,7 +159,6 @@ def cmd_scan(args):
     print(f"\nScan complete: {len(prompts)} prompts × {args.runs} runs", file=sys.stderr)
     print(f"Saved to {args.data_file} (scan #{scan_num})", file=sys.stderr)
 
-    # Quick summary
     print(f"\nQuick Results ({args.domain}):")
     for prompt, result in scan_results.items():
         mr = result.get("mention_rate", 0)
@@ -253,8 +180,7 @@ def cmd_report(args):
         print("No scan data found.", file=sys.stderr)
         sys.exit(1)
 
-    # Collect all prompts and their time series
-    prompt_series = defaultdict(list)  # prompt -> [(timestamp, citation_rate, mention_rate, cited_urls)]
+    prompt_series = defaultdict(list)
     domains_seen = set()
 
     for scan in scans:
@@ -270,7 +196,6 @@ def cmd_report(args):
                 "successful_runs": result.get("successful_runs", 0),
             })
 
-    # Analyze decay per prompt
     prompt_analysis = {}
     for prompt, series in prompt_series.items():
         if len(series) < 2:
@@ -290,7 +215,6 @@ def cmd_report(args):
         cr_latest = latest["citation_rate"]
         cr_diff = cr_latest - cr_first
 
-        # Calculate weeks between first and latest
         try:
             d1 = datetime.fromisoformat(first["timestamp"].replace("Z", "+00:00"))
             d2 = datetime.fromisoformat(latest["timestamp"].replace("Z", "+00:00"))
@@ -298,7 +222,6 @@ def cmd_report(args):
         except Exception:
             weeks = 1
 
-        # Determine trend
         if cr_diff < -20:
             trend = "rapid_decline"
         elif cr_diff < -5:
@@ -310,12 +233,10 @@ def cmd_report(args):
         else:
             trend = "stable"
 
-        # Determine refresh urgency
         if trend in ("rapid_decline",) and cr_first > 30:
             urgency = "HIGH"
             est_weeks = None
             if cr_diff != 0:
-                # Estimate weeks until citation reaches 0 at current rate
                 rate_per_week = cr_diff / weeks if weeks > 0 else cr_diff
                 if rate_per_week < 0 and cr_latest > 0:
                     est_weeks = round(-cr_latest / rate_per_week)
@@ -332,7 +253,6 @@ def cmd_report(args):
             urgency = "LOW"
             note = f"Citation rate {trend}: {cr_first}% → {cr_latest}% over {weeks} weeks."
 
-        # Track which URLs are cited over time
         url_timeline = defaultdict(list)
         for entry in series:
             for url, count in entry.get("cited_urls", {}).items():
@@ -357,14 +277,12 @@ def cmd_report(args):
             "cited_urls": dict(url_timeline),
         }
 
-    # Sort by urgency
     urgency_order = {"HIGH": 0, "MEDIUM": 1, "LOW": 2, "UNKNOWN": 3}
     sorted_prompts = sorted(
         prompt_analysis.items(),
         key=lambda x: (urgency_order.get(x[1]["urgency"], 9), -abs(x[1].get("change", 0)))
     )
 
-    # Summary
     high_count = sum(1 for _, a in sorted_prompts if a["urgency"] == "HIGH")
     medium_count = sum(1 for _, a in sorted_prompts if a["urgency"] == "MEDIUM")
     declining_prompts = [p for p, a in sorted_prompts if a.get("trend", "").endswith("decline") or a.get("trend") == "declining"]
@@ -402,7 +320,6 @@ def format_report_text(report: dict) -> str:
     lines.append(f"Domain(s): {', '.join(report['domains'])}")
     lines.append("=" * 70)
 
-    # Urgency summary
     us = report["urgency_summary"]
     lines.append("")
     lines.append("REFRESH URGENCY SUMMARY:")
@@ -410,7 +327,6 @@ def format_report_text(report: dict) -> str:
     lines.append(f"  🟡 MEDIUM: {us['medium']} prompts — gradual decline")
     lines.append(f"  Declining: {us['declining_prompts']} of {report['prompts_analyzed']} prompts")
 
-    # Per-prompt analysis
     lines.append("")
     lines.append("PROMPT-BY-PROMPT ANALYSIS:")
     lines.append("=" * 70)
@@ -435,7 +351,6 @@ def format_report_text(report: dict) -> str:
                 lines.append(f"    {url}")
                 lines.append(f"      Counts across scans: {counts_str}")
 
-    # Recommendations
     lines.append("")
     lines.append("PAGES MOST IN NEED OF REFRESH:")
     lines.append("=" * 70)
@@ -452,7 +367,6 @@ def format_report_text(report: dict) -> str:
                 })
 
     if refresh_candidates:
-        # Deduplicate by URL, keep highest urgency
         seen_urls = {}
         for rc in refresh_candidates:
             if rc["url"] not in seen_urls or \
@@ -479,24 +393,19 @@ def main():
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    # Scan subcommand
     scan_parser = subparsers.add_parser("scan", help="Run a freshness scan")
-    scan_parser.add_argument("--domain", required=True,
-                             help="Domain to track")
-    scan_parser.add_argument("--prompts", nargs="+",
-                             help="Prompts to scan")
-    scan_parser.add_argument("--prompts-file",
-                             help="File with one prompt per line")
+    scan_parser.add_argument("--domain", required=True, help="Domain to track")
+    scan_parser.add_argument("--prompts", nargs="+", help="Prompts to scan")
+    scan_parser.add_argument("--prompts-file", help="File with one prompt per line")
     scan_parser.add_argument("--data-file", default="freshness.json",
                              help="Data file path (default: freshness.json)")
-    scan_parser.add_argument("--runs", type=int, default=20,
+    scan_parser.add_argument("--runs", type=int, default=DEFAULT_RUNS,
                              help="Runs per prompt (default: 20)")
-    scan_parser.add_argument("--model", default="gemini-3-flash-preview",
+    scan_parser.add_argument("--model", default=DEFAULT_MODEL,
                              help="Gemini model (default: gemini-3-flash-preview)")
-    scan_parser.add_argument("--concurrency", type=int, default=5,
+    scan_parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
                              help="Max concurrent requests (default: 5)")
 
-    # Report subcommand
     report_parser = subparsers.add_parser("report", help="Analyze decay patterns")
     report_parser.add_argument("--data-file", default="freshness.json",
                                help="Data file path (default: freshness.json)")

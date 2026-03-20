@@ -19,9 +19,9 @@ Monitor when your content exits the recurring retrieval set — and catch decay 
 
 ## Background
 
-Being cited once doesn't matter. [Influence compounds through repeated inclusion](https://www.clearscope.io/blog/how-to-influence-ai-answers) in the **recurring retrieval set** — the group of sources Gemini consistently draws from when answering a prompt. But that set isn't static. As content ages, competitors publish fresher alternatives, and the model's search queries evolve, your pages can slip out of the candidate set entirely.
+Being cited once doesn't matter. Influence compounds through repeated inclusion in the **recurring retrieval set** — the group of sources Gemini consistently draws from when answering a prompt. But that set isn't static. As content ages, competitors publish fresher alternatives, and the model's search queries evolve, your pages can slip out of the candidate set entirely.
 
-In a [search-first system like Gemini](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence), retrievability depends on alignment with the queries the model generates, comprehensive topic coverage, and freshness signals. When any of these degrade, your citation rate decays. This skill tracks that decay over time so you can catch it early and refresh before you lose your position in the recurring retrieval set.
+In a search-first system like Gemini, retrievability depends on alignment with the queries the model generates, comprehensive topic coverage, and freshness signals. When any of these degrade, your citation rate decays. This skill tracks that decay over time so you can catch it early and refresh before you lose your position in the recurring retrieval set.
 
 The "long long tail" of Gemini's search behavior means the model generates varied, specific queries — and as those queries evolve, previously-cited content may no longer match. Tracking decay reveals when this happens.
 
@@ -45,14 +45,14 @@ The "long long tail" of Gemini's search behavior means the model generates varie
 # Scan prompts and save to data file
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
   python3 scripts/track.py scan \
-    --domain clearscope.io \
+    --domain acme.com \
     --prompts "best content optimization tools" "SEO content software" \
     --data-file freshness.json
 
 # With prompts from a file
 GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
   python3 scripts/track.py scan \
-    --domain clearscope.io \
+    --domain acme.com \
     --prompts-file prompts.txt \
     --data-file freshness.json
 ```
@@ -98,12 +98,12 @@ Quick summary after each scan:
 
 ```
 Freshness Decay Tracker — Scan
-Domain: clearscope.io | Prompts: 2 | Model: gemini-3-flash-preview
+Domain: acme.com | Prompts: 2 | Model: gemini-3-flash-preview
 
 Scan complete: 2 prompts × 20 runs
 Saved to freshness.json (scan #3)
 
-Quick Results (clearscope.io):
+Quick Results (acme.com):
   "best content optimization tools":
     Mention: 85% | Citation: 80%
   "SEO content software":
@@ -116,7 +116,7 @@ Quick Results (clearscope.io):
 Freshness Decay Tracker — Report
 Data: freshness.json (5 scans)
 Period: 2025-01-15 → 2025-03-15
-Domain(s): clearscope.io
+Domain(s): acme.com
 ======================================================================
 
 REFRESH URGENCY SUMMARY:
@@ -138,7 +138,7 @@ PROMPT-BY-PROMPT ANALYSIS:
     2025-03-01: citation 40% | mention 50%
     2025-03-15: citation 35% | mention 45%
   Cited URLs:
-    https://clearscope.io/blog/content-optimization-tools
+    https://acme.com/blog/content-optimization-tools
       Counts across scans: 14 → 12 → 9 → 6 → 5
 
 🟢 "SEO content software"
@@ -148,7 +148,7 @@ PROMPT-BY-PROMPT ANALYSIS:
 
 PAGES MOST IN NEED OF REFRESH:
 ======================================================================
-  🔴 https://clearscope.io/blog/content-optimization-tools
+  🔴 https://acme.com/blog/content-optimization-tools
     Prompt: "best content optimization tools" | Change: -45%
 ```
 
@@ -161,7 +161,7 @@ Append-only JSON. Each `scan` adds an entry, never modifying previous data:
   "scans": [
     {
       "timestamp": "2025-01-15T14:30:00+00:00",
-      "domain": "clearscope.io",
+      "domain": "acme.com",
       "model": "gemini-3-flash-preview",
       "runs_per_prompt": 20,
       "results": {
@@ -172,7 +172,7 @@ Append-only JSON. Each `scan` adds an entry, never modifying previous data:
           "citation_rate": 80,
           "citation_count": 16,
           "cited_urls": {
-            "https://clearscope.io/blog/content-optimization-tools": 14
+            "https://acme.com/blog/content-optimization-tools": 14
           }
         }
       }
@@ -217,8 +217,7 @@ Append-only JSON. Each `scan` adds an entry, never modifying previous data:
 
 ## References
 
-- [How to Influence AI Answers](https://www.clearscope.io/blog/how-to-influence-ai-answers) — Why repeated inclusion in the recurring retrieval set matters
-- [Gemini Creates More Opportunity; GPT Is Harder to Influence](https://www.clearscope.io/blog/gemini-creates-more-opportunity-gpt-is-harder-to-influence) — The long tail of search queries and why freshness matters in search-first systems
+
 
 ## Notes
 
