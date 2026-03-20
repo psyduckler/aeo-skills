@@ -17,64 +17,17 @@ import sys
 import time
 import urllib.request
 import urllib.error
+import urllib.parse
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from urllib.parse import urlparse
 
-
-# ── Gemini API ──────────────────────────────────────────────────────────────
-
-def call_gemini(prompt: str, api_key: str, model: str) -> dict:
-    """Call Gemini API with Google Search grounding."""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-    payload = json.dumps({
-        "contents": [{"parts": [{"text": prompt}]}],
-        "tools": [{"google_search": {}}],
-    }).encode()
-    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-    for attempt in range(5):
-        try:
-            with urllib.request.urlopen(req, timeout=180) as resp:
-                return json.loads(resp.read())
-        except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt < 4:
-                wait = (2 ** attempt) + 1
-                time.sleep(wait)
-            elif attempt < 4:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": f"HTTP {e.code}: {e.reason}"}
-        except (urllib.error.URLError, TimeoutError, OSError) as e:
-            if attempt < 4:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": str(e)}
-
-
-def extract_sources(response: dict) -> list:
-    """Extract grounding sources from Gemini response."""
-    sources = []
-    seen = set()
-    for cand in response.get("candidates", []):
-        meta = cand.get("groundingMetadata", {})
-        for chunk in meta.get("groundingChunks", []):
-            web = chunk.get("web", {})
-            uri = web.get("uri", "")
-            title = web.get("title", "")
-            if uri and uri not in seen:
-                seen.add(uri)
-                sources.append({"title": title, "uri": uri})
-    return sources
-
-
-def extract_response_text(response: dict) -> str:
-    """Extract text from Gemini response."""
-    texts = []
-    for cand in response.get("candidates", []):
-        for part in cand.get("content", {}).get("parts", []):
-            if "text" in part:
-                texts.append(part["text"])
-    return "\n".join(texts)
+# ── Shared imports ──────────────────────────────────────────────────────────
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from shared.gemini_client import (
+    call_gemini, extract_sources, extract_response_text, extract_domain,
+    domain_matches, get_api_key,
+    DEFAULT_MODEL, DEFAULT_RUNS, DEFAULT_CONCURRENCY,
+)
 
 
 # ── Brave Search API ───────────────────────────────────────────────────────
@@ -92,7 +45,6 @@ def search_brave(query: str, api_key: str, count: int = 20) -> list:
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
                 data = resp.read()
-                # Handle gzip
                 if resp.headers.get("Content-Encoding") == "gzip":
                     import gzip
                     data = gzip.decompress(data)
@@ -102,7 +54,7 @@ def search_brave(query: str, api_key: str, count: int = 20) -> list:
                     results.append({
                         "title": item.get("title", ""),
                         "url": item.get("url", ""),
-                        "domain": get_domain(item.get("url", "")),
+                        "domain": extract_domain(item.get("url", "")),
                         "rank": i + 1,
                     })
                 return results
@@ -114,31 +66,11 @@ def search_brave(query: str, api_key: str, count: int = 20) -> list:
                 return []
 
 
-import urllib.parse
-
-
-# ── Utilities ──────────────────────────────────────────────────────────────
-
-def get_domain(uri: str) -> str:
-    """Extract clean domain from URI."""
-    try:
-        parsed = urlparse(uri)
-        domain = parsed.netloc.lower()
-        if domain.startswith("www."):
-            domain = domain[4:]
-        return domain
-    except Exception:
-        return ""
-
-
 # ── Main Analysis ─────────────────────────────────────────────────────────
 
 def run_gemini_analysis(prompt: str, runs: int, model: str, concurrency: int):
     """Run prompt through Gemini with grounding and aggregate sources."""
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("Error: GEMINI_API_KEY environment variable required", file=sys.stderr)
-        sys.exit(1)
+    api_key = get_api_key()
 
     domain_cite_count = defaultdict(int)
     domain_urls = defaultdict(set)
@@ -161,7 +93,7 @@ def run_gemini_analysis(prompt: str, runs: int, model: str, concurrency: int):
                 total_ok += 1
                 seen_domains = set()
                 for s in sources:
-                    d = get_domain(s["uri"])
+                    d = extract_domain(s["uri"])
                     domain_urls[d].add(s["uri"])
                     if d not in seen_domains:
                         domain_cite_count[d] += 1
@@ -188,10 +120,8 @@ def run_gemini_analysis(prompt: str, runs: int, model: str, concurrency: int):
 
 def run_analysis(prompt: str, domain: str, runs: int, model: str, concurrency: int = 5):
     """Full gap analysis: Gemini grounding + Brave web search."""
-    # 1. Gemini grounding analysis
     gemini = run_gemini_analysis(prompt, runs, model, concurrency)
 
-    # 2. Brave web search
     brave_key = os.environ.get("BRAVE_API_KEY")
     web_results = []
     web_domains = set()
@@ -202,7 +132,6 @@ def run_analysis(prompt: str, domain: str, runs: int, model: str, concurrency: i
     else:
         print("BRAVE_API_KEY not set — skipping web search comparison", file=sys.stderr)
 
-    # 3. Gap analysis
     gemini_domains = set(gemini["domains"].keys())
 
     google_only = []
@@ -231,7 +160,6 @@ def run_analysis(prompt: str, domain: str, runs: int, model: str, concurrency: i
                 "title": r["title"],
             })
 
-    # 4. Domain-specific report
     target = domain.lower()
     if target.startswith("www."):
         target = target[4:]
@@ -245,7 +173,6 @@ def run_analysis(prompt: str, domain: str, runs: int, model: str, concurrency: i
         "web_rank": next((r["rank"] for r in web_results if r["domain"] == target), None),
     }
 
-    # Determine status
     if domain_report["in_google_ai"] and domain_report["in_web_search"]:
         domain_report["status"] = "STRONG"
         domain_report["status_detail"] = "Cross-platform visibility — cited by Google AI and ranks in web search"
@@ -259,7 +186,6 @@ def run_analysis(prompt: str, domain: str, runs: int, model: str, concurrency: i
         domain_report["status"] = "ABSENT"
         domain_report["status_detail"] = "Not found in Google AI citations or web top results — content gap"
 
-    # 5. Recommendations
     recommendations = []
     if domain_report["status"] == "STRONG":
         recommendations.append("Maintain current content quality — you have cross-platform authority")
@@ -320,14 +246,12 @@ def format_text(result: dict) -> str:
     lines.append("=" * 64)
     lines.append("")
 
-    # Google AI citations
     ga = result["gemini_analysis"]
     lines.append(f"GOOGLE AI CITATIONS (Gemini 3 Flash, {ga['successful_runs']} runs):")
     for d in ga["top_domains"][:10]:
         lines.append(f"  {d['citation_rate']}% — {d['domain']}")
     lines.append("")
 
-    # Web search results
     ws = result["web_search"]
     if ws["available"]:
         lines.append(f"WEB SEARCH RESULTS (Brave, top {ws['results_count']}):")
@@ -335,7 +259,6 @@ def format_text(result: dict) -> str:
             lines.append(f"  #{r['rank']} — {r['domain']} — {r['title'][:60]}")
         lines.append("")
 
-    # Gap analysis
     gaps = result["gaps"]
     if ws["available"]:
         lines.append("GAP ANALYSIS:")
@@ -353,7 +276,6 @@ def format_text(result: dict) -> str:
                 lines.append(f"    - {b['domain']} ({b['ai_citation_rate']}% AI, web #{b['web_rank']})")
         lines.append("")
 
-    # Domain report
     dr = result["domain_report"]
     lines.append(f"DOMAIN REPORT: {dr['domain']}")
     ai_mark = "✅" if dr["in_google_ai"] else "❌"
@@ -369,7 +291,6 @@ def format_text(result: dict) -> str:
             lines.append(f"    - {url}")
     lines.append("")
 
-    # Recommendations
     if result["recommendations"]:
         lines.append("RECOMMENDATIONS:")
         for rec in result["recommendations"]:
@@ -384,8 +305,8 @@ def main():
     )
     parser.add_argument("prompt", help="The query/prompt to analyze")
     parser.add_argument("--domain", required=True, help="Domain to track (e.g., example.com)")
-    parser.add_argument("--runs", type=int, default=20, help="Number of Gemini runs (default: 20)")
-    parser.add_argument("--model", default="gemini-3-flash-preview",
+    parser.add_argument("--runs", type=int, default=DEFAULT_RUNS, help="Number of Gemini runs (default: 20)")
+    parser.add_argument("--model", default=DEFAULT_MODEL,
                         help="Gemini model (default: gemini-3-flash-preview)")
     parser.add_argument("--output", choices=["text", "json"], default="text",
                         help="Output format (default: text)")

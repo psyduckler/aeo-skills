@@ -1,0 +1,211 @@
+{
+  "meta": {
+    "prompt": "best seo tools for small businesses",
+    "model": "gemini-3-flash-preview",
+    "runs": 20,
+    "domain": "clearscope.io",
+    "diff_enabled": true,
+    "timestamp": "2026-03-19T14:23:07Z",
+    "duration_seconds": 47.3
+  },
+  "source_citations": {
+    "total_unique_sources": 23,
+    "avg_sources_per_response": 4.7,
+    "sources": [
+      {
+        "domain": "semrush.com",
+        "citations": 18,
+        "rate": 0.90,
+        "avg_position": 1.2,
+        "urls": [
+          "https://www.semrush.com/blog/best-seo-tools/",
+          "https://www.semrush.com/features/"
+        ]
+      },
+      {
+        "domain": "ahrefs.com",
+        "citations": 16,
+        "rate": 0.80,
+        "avg_position": 1.8,
+        "urls": [
+          "https://ahrefs.com/blog/best-seo-tools/",
+          "https://ahrefs.com/seo-tools"
+        ]
+      },
+      {
+        "domain": "backlinko.com",
+        "citations": 14,
+        "rate": 0.70,
+        "avg_position": 3.1,
+        "urls": [
+          "https://backlinko.com/best-seo-tools"
+        ]
+      },
+      {
+        "domain": "searchenginejournal.com",
+        "citations": 12,
+        "rate": 0.60,
+        "avg_position": 3.6,
+        "urls": [
+          "https://www.searchenginejournal.com/best-seo-tools/",
+          "https://www.searchenginejournal.com/seo-tools-small-business/"
+        ]
+      },
+      {
+        "domain": "clearscope.io",
+        "citations": 8,
+        "rate": 0.40,
+        "avg_position": 3.9,
+        "urls": [
+          "https://www.clearscope.io/",
+          "https://www.clearscope.io/blog/content-optimization"
+        ]
+      },
+      {
+        "domain": "moz.com",
+        "citations": 8,
+        "rate": 0.40,
+        "avg_position": 4.2,
+        "urls": [
+          "https://moz.com/blog/best-seo-tools",
+          "https://moz.com/products"
+        ]
+      },
+      {
+        "domain": "hubspot.com",
+        "citations": 7,
+        "rate": 0.35,
+        "avg_position": 5.1,
+        "urls": [
+          "https://blog.hubspot.com/marketing/best-seo-tools"
+        ]
+      },
+      {
+        "domain": "neilpatel.com",
+        "citations": 6,
+        "rate": 0.30,
+        "avg_position": 4.8,
+        "urls": [
+          "https://neilpatel.com/blog/seo-tools/"
+        ]
+      },
+      {
+        "domain": "searchengineland.com",
+        "citations": 5,
+        "rate": 0.25,
+        "avg_position": 5.4,
+        "urls": [
+          "https://searchengineland.com/best-seo-tools-guide"
+        ]
+      },
+      {
+        "domain": "wordstream.com",
+        "citations": 3,
+        "rate": 0.15,
+        "avg_position": 6.0,
+        "urls": [
+          "https://www.wordstream.com/blog/seo-tools-small-business"
+        ]
+      }
+    ]
+  },
+  "domain_tracking": {
+    "domain": "clearscope.io",
+    "mention_rate": 0.60,
+    "mention_count": 12,
+    "citation_rate": 0.40,
+    "citation_count": 8,
+    "avg_position": 3.9,
+    "best_position": 2,
+    "worst_position": 6,
+    "context_snippets": [
+      {
+        "run": 3,
+        "text": "Clearscope uses AI to analyze top-ranking content and provides optimization recommendations based on relevant terms and topics."
+      },
+      {
+        "run": 7,
+        "text": "For content optimization specifically, tools like Clearscope and Surfer SEO help small businesses create content that ranks."
+      },
+      {
+        "run": 11,
+        "text": "Clearscope offers real-time content grading and integrates with Google Docs and WordPress."
+      },
+      {
+        "run": 18,
+        "text": "…other popular options include Clearscope for content optimization and Screaming Frog for technical audits."
+      }
+    ]
+  },
+  "grounding_queries": {
+    "unique_queries": 10,
+    "avg_queries_per_run": 3.2,
+    "queries": [
+      {"query": "best seo tools for small businesses", "frequency": 18, "rate": 0.90},
+      {"query": "affordable seo software small business", "frequency": 14, "rate": 0.70},
+      {"query": "seo tools for small business 2026", "frequency": 11, "rate": 0.55},
+      {"query": "best seo tools comparison", "frequency": 9, "rate": 0.45},
+      {"query": "free seo tools for beginners", "frequency": 7, "rate": 0.35},
+      {"query": "small business seo software reviews", "frequency": 6, "rate": 0.30},
+      {"query": "keyword research tools for small business", "frequency": 5, "rate": 0.25},
+      {"query": "content optimization tools seo", "frequency": 4, "rate": 0.20},
+      {"query": "technical seo audit tools small business", "frequency": 3, "rate": 0.15},
+      {"query": "best seo platforms pricing plans", "frequency": 2, "rate": 0.10}
+    ],
+    "intent_distribution": {
+      "commercial_investigation": 0.65,
+      "informational": 0.20,
+      "transactional": 0.15
+    }
+  },
+  "stability_analysis": {
+    "stability_score": 0.67,
+    "stable_fragments": [
+      {
+        "text": "SEMrush and Ahrefs are widely considered the most comprehensive SEO tools available, offering keyword research, site audits, backlink analysis, and competitor tracking.",
+        "appeared_in": 17
+      },
+      {
+        "text": "For small businesses on a budget, free tools like Google Search Console, Google Analytics, and Ubersuggest offer essential SEO capabilities.",
+        "appeared_in": 16
+      },
+      {
+        "text": "Moz offers a beginner-friendly interface with features like keyword explorer and domain authority tracking.",
+        "appeared_in": 15
+      }
+    ],
+    "volatile_fragments": [
+      {
+        "text": "Mangools is an underrated option that provides KWFinder for keyword research at a lower price point than competitors.",
+        "appeared_in": 4
+      },
+      {
+        "text": "SpyFu specializes in competitor keyword analysis and PPC research.",
+        "appeared_in": 3
+      },
+      {
+        "text": "Consider Rank Math as a WordPress SEO plugin alternative to Yoast for on-page optimization.",
+        "appeared_in": 2
+      }
+    ],
+    "sentence_counts": {
+      "stable_75pct_plus": 8,
+      "moderate_25_to_75pct": 6,
+      "volatile_under_25pct": 4,
+      "total_unique_variants": 18
+    }
+  },
+  "recommendations": {
+    "strengths": [
+      "40% citation rate puts you in the recurring candidate set",
+      "Consistently mentioned in content optimization context",
+      "Average position 3.9 — middle of the pack but visible"
+    ],
+    "opportunities": [
+      "Gap vs semrush.com (90%) and ahrefs.com (80%) — they dominate top positions",
+      "Not appearing for 'free seo tools' queries — consider a free tier or freemium content strategy",
+      "'content optimization tools seo' query (4/20) is your best entry point — create content targeting this query",
+      "Volatile mentions suggest positioning isn't locked in — more entity-rich content could stabilize presence"
+    ]
+  }
+}

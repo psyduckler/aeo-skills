@@ -1,0 +1,224 @@
+================================================================================
+  AEO PIPELINE — Full Analysis Report
+================================================================================
+
+  Prompts:   "best seo tools"
+             "how to optimize content for ai"
+  Domain:    clearscope.io
+  Model:     gemini-3-flash-preview (with Google Search grounding)
+  Runs:      20 per prompt (40 total)
+  Timestamp: 2026-03-19T15:18:55Z
+  Duration:  2m 14s
+
+================================================================================
+  SECTION 1: AI OVERVIEW SIMULATION
+================================================================================
+
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │  Prompt: "best seo tools"                                              │
+  └──────────────────────────────────────────────────────────────────────────┘
+
+  Top Sources:
+    Rank  Domain                        Citations  Rate     Avg Pos
+     1    semrush.com                    17/20      85.0%    1.3
+     2    ahrefs.com                     16/20      80.0%    1.7
+     3    backlinko.com                  13/20      65.0%    2.9
+     4    moz.com                        11/20      55.0%    3.4
+     5    searchenginejournal.com        10/20      50.0%    3.8
+     6    clearscope.io                   7/20      35.0%    4.2
+     7    hubspot.com                     6/20      30.0%    5.1
+     8    neilpatel.com                   5/20      25.0%    4.9
+
+  Domain Tracking (clearscope.io):
+    Mention rate:   10/20 (50.0%)
+    Citation rate:   7/20 (35.0%)
+    Avg position:   4.2
+
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │  Prompt: "how to optimize content for ai"                              │
+  └──────────────────────────────────────────────────────────────────────────┘
+
+  Top Sources:
+    Rank  Domain                        Citations  Rate     Avg Pos
+     1    searchenginejournal.com        15/20      75.0%    1.6
+     2    clearscope.io                  12/20      60.0%    2.3
+     3    hubspot.com                    10/20      50.0%    3.2
+     4    contentmarketinginstitute.com   9/20      45.0%    3.5
+     5    semrush.com                     8/20      40.0%    3.9
+     6    backlinko.com                   7/20      35.0%    4.1
+     7    surferseo.com                   6/20      30.0%    4.4
+     8    ahrefs.com                      4/20      20.0%    5.2
+
+  Domain Tracking (clearscope.io):
+    Mention rate:   15/20 (75.0%)
+    Citation rate:  12/20 (60.0%)
+    Avg position:   2.3
+
+================================================================================
+  SECTION 2: GROUNDING QUERY FREQUENCY
+================================================================================
+
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │  Prompt: "best seo tools"                                              │
+  └──────────────────────────────────────────────────────────────────────────┘
+
+  Freq   Intent          Query
+  ─────  ──────────────  ─────────────────────────────────────
+  18/20  Commercial      best seo tools 2026
+  14/20  Commercial      best seo software comparison
+  12/20  Commercial      top seo tools for professionals
+   9/20  Informational   seo tools features comparison
+   7/20  Commercial      affordable seo tools
+   5/20  Commercial      enterprise seo platforms
+   4/20  Informational   what seo tools do experts use
+   3/20  Transactional   seo tools free trial
+
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │  Prompt: "how to optimize content for ai"                              │
+  └──────────────────────────────────────────────────────────────────────────┘
+
+  Freq   Intent          Query
+  ─────  ──────────────  ─────────────────────────────────────
+  17/20  Informational   how to optimize content for ai search
+  15/20  Informational   ai content optimization strategies
+  12/20  Informational   optimize content for ai overviews
+  10/20  Informational   answer engine optimization guide
+   8/20  Informational   how to get cited by ai chatbots
+   6/20  Commercial      ai content optimization tools
+   4/20  Informational   structured data for ai citations
+   3/20  Informational   GEO generative engine optimization
+
+  Combined Query Stats:
+    Total unique queries: 16
+    Avg queries per run: 3.4
+    Query overlap between prompts: 2 shared queries (12.5%)
+
+================================================================================
+  SECTION 3: SOURCE AUTHORITY PROFILES
+================================================================================
+
+  Citation Blueprint (top-cited pages for both prompts combined):
+
+  Metric                     Average    Median
+  ─────────────────────────  ─────────  ─────────
+  Word count                 3,420      3,200
+  Heading count (H2+H3)     15.1       14
+  Schema types used          2.3        2
+  Content freshness          3.8 mo     3 mo
+  External citations         11.6       10
+
+  Top 5 Authority Sources (cross-prompt):
+    1. semrush.com        — Avg citation rate 62.5% | Strong: depth, freshness
+    2. searchenginejournal — Avg citation rate 62.5% | Strong: breadth, authority
+    3. backlinko.com      — Avg citation rate 50.0% | Strong: editorial, visuals
+    4. clearscope.io      — Avg citation rate 47.5% | Strong: AI expertise niche
+    5. hubspot.com        — Avg citation rate 40.0% | Strong: schema, ecosystem
+
+================================================================================
+  SECTION 4: ENTITY EXTRACTION
+================================================================================
+
+  Top Entities Across Both Prompts:
+
+  BRANDS (by combined frequency):
+    SEMrush (87.5%) | Ahrefs (75.0%) | Google (72.5%) | Moz (52.5%)
+    Clearscope (47.5%) | Surfer SEO (37.5%) | HubSpot (35.0%)
+
+  TOOLS/FEATURES:
+    keyword research (82.5%) | content optimization (67.5%)
+    backlink analysis (62.5%) | site audit (57.5%) | NLP analysis (42.5%)
+    structured data (37.5%) | SERP analysis (35.0%)
+
+  CONCEPTS:
+    AI Overviews (55.0%) | E-E-A-T (47.5%) | answer engine optimization (40.0%)
+    topical authority (32.5%) | entity optimization (27.5%)
+
+  STATISTICS:
+    "67% of clicks go to top 5 results" (30.0%)
+    "25% of Google searches show AI Overviews" (27.5%)
+    "SEMrush has 10M+ users" (25.0%)
+
+================================================================================
+  SECTION 5: STABILITY ANALYSIS
+================================================================================
+
+  Prompt                               Stability Score
+  ───────────────────────────────────  ───────────────
+  "best seo tools"                     0.71 (stable)
+  "how to optimize content for ai"     0.58 (moderate)
+
+  "best seo tools" — well-established topic, core response structure is
+  consistent. Tool names are stable; descriptions and ordering vary.
+
+  "how to optimize content for ai" — newer topic, more response variance.
+  AI-specific strategies (AEO, GEO) appear inconsistently, suggesting the
+  model's knowledge is still consolidating around these concepts.
+
+================================================================================
+  SECTION 6: CROSS-PROMPT OVERLAP
+================================================================================
+
+  Source overlap between the two prompts:
+
+  Domain                    Prompt 1    Prompt 2    Overlap
+  ──────────────────────    ────────    ────────    ───────
+  semrush.com               85.0%       40.0%       ✅ Both
+  clearscope.io             35.0%       60.0%       ✅ Both
+  searchenginejournal.com   50.0%       75.0%       ✅ Both
+  backlinko.com             65.0%       35.0%       ✅ Both
+  hubspot.com               30.0%       50.0%       ✅ Both
+  ahrefs.com                80.0%       20.0%       ✅ Both
+  moz.com                   55.0%        0.0%       Prompt 1 only
+  surferseo.com              0.0%       30.0%       Prompt 2 only
+
+  Cross-prompt authority pages (cited for BOTH prompts):
+    6 of 8 unique sources appear in both — strong overlap.
+    These are "hub pages" that rank for multiple AI prompt types.
+
+================================================================================
+  SECTION 7: RECOMMENDATIONS FOR clearscope.io
+================================================================================
+
+  Overall Position:
+    Cross-prompt citation rate: 47.5% (average of both prompts)
+    Strongest prompt: "how to optimize content for ai" (60.0%)
+    Weakest prompt:  "best seo tools" (35.0%)
+
+  ✅ WINNING:
+    • Strong authority on AI/content optimization topics — 60% citation rate
+    • Mentioned as a top tool in the content optimization category
+    • Positioned as a specialist (not a generalist like SEMrush/Ahrefs)
+
+  🔴 CRITICAL ACTIONS:
+    1. REFRESH "best seo tools" content — your 35% citation rate trails semrush
+       (85%) and ahrefs (80%). Update pricing, add comparison tables, expand
+       coverage to 15+ tools.
+
+    2. PUBLISH AEO-specific content — "answer engine optimization" and "GEO"
+       concepts appear in 40%+ of responses for the AI optimization prompt.
+       No competitor owns this topic yet. First-mover advantage is real.
+
+    3. ADD ENTITY COVERAGE — your content is missing key statistics that appear
+       in 25-30% of AI responses. Add data points like "25% of Google searches
+       show AI Overviews" and competitive pricing comparisons.
+
+  🟡 HIGH PRIORITY:
+    4. Build a hub page — you're already cited for both prompts. A comprehensive
+       "Content Optimization for AI" guide could become a cross-prompt authority
+       page, boosting citation rates for both topics.
+
+    5. Schema markup — add FAQPage and ItemList schema to your comparison pages.
+       70% of top-cited pages use Article schema; only 40% use FAQPage.
+       Adding both gives you an edge.
+
+    6. Increase freshness cadence — top competitors update every 1-3 months.
+       Set a quarterly refresh schedule for key pages.
+
+  🟢 MAINTAIN:
+    7. Continue building topical authority in AI/content optimization niche
+    8. Keep WordPress and Google Docs integration messaging (differentiator)
+    9. Maintain structured data quality (ahead of most competitors)
+
+================================================================================
+  END OF PIPELINE REPORT
+================================================================================

@@ -14,76 +14,16 @@ import json
 import os
 import re
 import sys
-import time
-import urllib.request
-import urllib.error
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from urllib.parse import urlparse
 
-
-def call_gemini(prompt: str, api_key: str, model: str) -> dict:
-    """Call Gemini API with Google Search grounding. Returns parsed JSON response."""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-    payload = json.dumps({
-        "contents": [{"parts": [{"text": prompt}]}],
-        "tools": [{"google_search": {}}],
-    }).encode()
-    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-    for attempt in range(5):
-        try:
-            with urllib.request.urlopen(req, timeout=180) as resp:
-                return json.loads(resp.read())
-        except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt < 4:
-                wait = (2 ** attempt) + 1
-                print(f"    Rate limited, waiting {wait}s...", file=sys.stderr)
-                time.sleep(wait)
-            elif attempt < 4:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": f"HTTP {e.code}: {e.reason}"}
-        except (urllib.error.URLError, TimeoutError, OSError) as e:
-            if attempt < 4:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": str(e)}
-
-
-def extract_response_text(response: dict) -> str:
-    """Extract the text content from a Gemini response."""
-    texts = []
-    for cand in response.get("candidates", []):
-        content = cand.get("content", {})
-        for part in content.get("parts", []):
-            if "text" in part:
-                texts.append(part["text"])
-    return "\n".join(texts)
-
-
-def extract_queries(response: dict) -> list:
-    """Extract web search queries from Gemini grounding metadata."""
-    queries = []
-    for cand in response.get("candidates", []):
-        meta = cand.get("groundingMetadata", {})
-        queries.extend(meta.get("webSearchQueries", []))
-    return queries
-
-
-def extract_sources(response: dict) -> list:
-    """Extract grounding source URLs and titles from Gemini response."""
-    sources = []
-    seen = set()
-    for cand in response.get("candidates", []):
-        meta = cand.get("groundingMetadata", {})
-        for chunk in meta.get("groundingChunks", []):
-            web = chunk.get("web", {})
-            uri = web.get("uri", "")
-            title = web.get("title", "")
-            if uri and uri not in seen:
-                seen.add(uri)
-                sources.append({"title": title, "uri": uri})
-    return sources
+# ── Shared imports ──────────────────────────────────────────────────────────
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from shared.gemini_client import (
+    call_gemini, extract_response_text, extract_queries, extract_sources,
+    extract_domain, domain_matches, get_api_key,
+    DEFAULT_MODEL, DEFAULT_RUNS, DEFAULT_CONCURRENCY,
+)
 
 
 def extract_grounding_supports(response: dict) -> list:
@@ -106,22 +46,9 @@ def extract_grounding_supports(response: dict) -> list:
     return supports
 
 
-def get_domain(uri: str) -> str:
-    """Extract domain from a URI."""
-    try:
-        parsed = urlparse(uri)
-        domain = parsed.netloc.lower()
-        if domain.startswith("www."):
-            domain = domain[4:]
-        return domain
-    except Exception:
-        return ""
-
-
 def check_domain_mention(text: str, domain: str) -> list:
     """Check if a domain/brand is mentioned in text. Returns matching excerpts."""
     excerpts = []
-    # Strip TLD for brand name matching (e.g., "monday.com" -> also search "monday")
     brand = domain.split(".")[0] if "." in domain else domain
     sentences = re.split(r'(?<=[.!?])\s+', text)
     for sentence in sentences:
@@ -159,34 +86,22 @@ def sentences_similar(a: str, b: str, threshold: float = 0.8) -> bool:
 
 
 def analyze_response_diff(run_results: list) -> dict:
-    """Analyze response text stability across runs.
-
-    Groups similar sentences and classifies them by frequency:
-    - Stable (>80%): always included
-    - Common (40-80%): usually included
-    - Volatile (10-40%): sometimes mentioned
-    - Rare (<10%): edge case mentions
-    """
+    """Analyze response text stability across runs."""
     successful_runs = len(run_results)
     if successful_runs == 0:
         return {}
 
-    # Split each response into sentences
     all_run_sentences = []
     for run in run_results:
         text = run.get("text", "")
-        # Split on sentence boundaries
         sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', text) if s.strip()]
         all_run_sentences.append(sentences)
 
-    # Group similar sentences across runs
-    # Each group: {"canonical": str, "count": int, "variants": list}
     sentence_groups = []
     for run_idx, sentences in enumerate(all_run_sentences):
         for sentence in sentences:
-            if len(sentence) < 10:  # skip tiny fragments
+            if len(sentence) < 10:
                 continue
-            # Try to match to an existing group
             matched = False
             for group in sentence_groups:
                 if sentences_similar(sentence, group["canonical"]):
@@ -205,11 +120,7 @@ def analyze_response_diff(run_results: list) -> dict:
                     "variants": [],
                 })
 
-    # Classify by frequency
-    stable = []  # >80%
-    common = []  # 40-80%
-    volatile = []  # 10-40%
-    rare = []  # <10%
+    stable, common, volatile, rare = [], [], [], []
 
     for group in sentence_groups:
         freq = round(group["count"] / successful_runs * 100)
@@ -227,11 +138,9 @@ def analyze_response_diff(run_results: list) -> dict:
         else:
             rare.append(entry)
 
-    # Sort each category by frequency desc
     for lst in [stable, common, volatile, rare]:
         lst.sort(key=lambda x: -x["frequency"])
 
-    # Entity frequency — extract capitalized multi-word names and domains
     entity_counts = defaultdict(int)
     entity_run_presence = defaultdict(set)
     entity_pattern = re.compile(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b')
@@ -239,13 +148,11 @@ def analyze_response_diff(run_results: list) -> dict:
 
     for run_idx, run in enumerate(run_results):
         text = run.get("text", "")
-        # Named entities
         for match in entity_pattern.finditer(text):
             name = match.group(1)
-            if len(name) > 2:  # skip short matches
+            if len(name) > 2:
                 entity_counts[name] += 1
                 entity_run_presence[name].add(run_idx)
-        # Domains
         for match in domain_pattern.finditer(text):
             domain = match.group(1).lower()
             entity_counts[domain] += 1
@@ -255,14 +162,13 @@ def analyze_response_diff(run_results: list) -> dict:
     for entity, count in sorted(entity_counts.items(), key=lambda x: -x[1]):
         run_count = len(entity_run_presence[entity])
         freq = round(run_count / successful_runs * 100)
-        if freq < 100:  # skip entities that appear in every run (likely generic words)
+        if freq < 100:
             entity_frequency.append({
                 "entity": entity,
                 "frequency": freq,
                 "run_count": run_count,
             })
 
-    # Keep top 20 volatile entities (not in every run)
     volatile_entities = [e for e in entity_frequency if e["frequency"] < 80][:20]
 
     return {
@@ -276,10 +182,7 @@ def analyze_response_diff(run_results: list) -> dict:
 
 def run_simulation(prompt: str, runs: int, model: str, concurrency: int, domain: str = None, diff: bool = False):
     """Run prompt N times and collect AI Overview simulation data."""
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("Error: GEMINI_API_KEY environment variable required", file=sys.stderr)
-        sys.exit(1)
+    api_key = get_api_key()
 
     run_results = []
     errors = 0
@@ -325,7 +228,7 @@ def run_simulation(prompt: str, runs: int, model: str, concurrency: int, domain:
     for run in run_results:
         seen_domains = set()
         for source in run["sources"]:
-            d = get_domain(source["uri"])
+            d = extract_domain(source["uri"])
             url_cite_count[source["uri"]] += 1
             domain_urls[d].add(source["uri"])
             if d not in seen_domains:
@@ -358,22 +261,19 @@ def run_simulation(prompt: str, runs: int, model: str, concurrency: int, domain:
         cited_urls_count = defaultdict(int)
 
         for run in run_results:
-            # Check mentions in text
             excerpts = check_domain_mention(run["text"], target_domain)
             if excerpts:
                 mention_count += 1
                 all_excerpts.extend(excerpts)
 
-            # Check citations in sources
             cited_in_run = False
             for source in run["sources"]:
-                if target_domain in get_domain(source["uri"]):
+                if domain_matches(source["uri"], target_domain):
                     cited_in_run = True
                     cited_urls_count[source["uri"]] += 1
             if cited_in_run:
                 citation_count += 1
 
-        # Deduplicate excerpts
         unique_excerpts = list(dict.fromkeys(all_excerpts))[:10]
 
         domain_tracking = {
@@ -389,7 +289,7 @@ def run_simulation(prompt: str, runs: int, model: str, concurrency: int, domain:
             "excerpts": unique_excerpts,
         }
 
-    # Response diff analysis (if enabled)
+    # Response diff analysis
     response_analysis = None
     if diff and run_results:
         print(f"\nAnalyzing response stability...", file=sys.stderr)
@@ -432,7 +332,6 @@ def format_text(result: dict) -> str:
     lines.append(f"Runs: {result['successful_runs']}/{result['total_runs']} successful")
     lines.append("")
 
-    # Top cited sources
     lines.append("Top Cited Sources:")
     lines.append("=" * 60)
     for s in result["sources"][:20]:
@@ -440,7 +339,6 @@ def format_text(result: dict) -> str:
         for url in s["urls"][:3]:
             lines.append(f"      {url}")
 
-    # Search queries
     if result["queries"]:
         lines.append("")
         lines.append("Search Queries Used:")
@@ -448,7 +346,6 @@ def format_text(result: dict) -> str:
         for q in result["queries"][:15]:
             lines.append(f"  {q['frequency']}% ({q['count']}/{result['successful_runs']}) — {q['query']}")
 
-    # Domain tracking
     dt = result.get("domain_tracking")
     if dt:
         lines.append("")
@@ -465,7 +362,6 @@ def format_text(result: dict) -> str:
             for ex in dt["excerpts"][:5]:
                 lines.append(f"    - \"{ex}\"")
 
-    # Response stability analysis
     ra = result.get("response_analysis")
     if ra:
         lines.append("")
@@ -505,10 +401,10 @@ def main():
     )
     parser.add_argument("prompt", help="The query/prompt to simulate")
     parser.add_argument("--domain", help="Domain to track (e.g., example.com)")
-    parser.add_argument("--runs", type=int, default=20, help="Number of simulation runs (default: 20)")
-    parser.add_argument("--model", default="gemini-3-flash-preview",
+    parser.add_argument("--runs", type=int, default=DEFAULT_RUNS, help="Number of simulation runs (default: 20)")
+    parser.add_argument("--model", default=DEFAULT_MODEL,
                         help="Gemini model (default: gemini-3-flash-preview)")
-    parser.add_argument("--concurrency", type=int, default=5,
+    parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
                         help="Max concurrent requests (default: 5)")
     parser.add_argument("--output", choices=["text", "json"], default="text",
                         help="Output format (default: text)")

@@ -1,0 +1,137 @@
+================================================================================
+  AEO AI Overview Simulator — Results
+================================================================================
+
+  Prompt:    "best seo tools for small businesses"
+  Model:     gemini-3-flash-preview (with Google Search grounding)
+  Runs:      20
+  Domain:    clearscope.io
+  Diff:      enabled
+  Timestamp: 2026-03-19T14:23:07Z
+
+================================================================================
+  SOURCE CITATION FREQUENCY
+================================================================================
+
+  Citations extracted from 20 grounded responses. Sources ranked by appearance
+  frequency across all runs.
+
+  Rank  Source Domain                    Citations  Rate     Avg Position
+  ────  ──────────────────────────────  ─────────  ───────  ────────────
+   1    semrush.com                      18/20      90.0%    1.2
+   2    ahrefs.com                       16/20      80.0%    1.8
+   3    backlinko.com                    14/20      70.0%    3.1
+   4    searchenginejournal.com          12/20      60.0%    3.6
+   5    clearscope.io                     8/20      40.0%    3.9
+   6    moz.com                           8/20      40.0%    4.2
+   7    hubspot.com                       7/20      35.0%    5.1
+   8    neilpatel.com                     6/20      30.0%    4.8
+   9    searchengineland.com              5/20      25.0%    5.4
+  10    wordstream.com                    3/20      15.0%    6.0
+
+  Total unique sources across all runs: 23
+  Average sources per response: 4.7
+
+================================================================================
+  DOMAIN TRACKING — clearscope.io
+================================================================================
+
+  Mention Rate:     12/20 (60.0%)   — brand name appeared in response text
+  Citation Rate:     8/20 (40.0%)   — cited as a source with link
+  Avg Position:     3.9             — when cited, average rank among sources
+  Best Position:    2               — highest rank achieved (run #7)
+  Worst Position:   6               — lowest rank achieved (run #14)
+
+  Context snippets (sample):
+    Run #3:  "Clearscope uses AI to analyze top-ranking content and provides
+             optimization recommendations based on relevant terms and topics."
+    Run #7:  "For content optimization specifically, tools like Clearscope and
+             Surfer SEO help small businesses create content that ranks."
+    Run #11: "Clearscope offers real-time content grading and integrates with
+             Google Docs and WordPress."
+    Run #18: "…other popular options include Clearscope for content optimization
+             and Screaming Frog for technical audits."
+
+================================================================================
+  GROUNDING QUERY PATTERNS
+================================================================================
+
+  Queries extracted from Gemini's grounding metadata. These are the actual
+  search queries the model fired to answer this prompt.
+
+  Freq   Query
+  ─────  ──────────────────────────────────────────────────────────
+  18/20  best seo tools for small businesses
+  14/20  affordable seo software small business
+  11/20  seo tools for small business 2026
+   9/20  best seo tools comparison
+   7/20  free seo tools for beginners
+   6/20  small business seo software reviews
+   5/20  keyword research tools for small business
+   4/20  content optimization tools seo
+   3/20  technical seo audit tools small business
+   2/20  best seo platforms pricing plans
+
+  Unique queries across all runs: 10
+  Avg queries per run: 3.2
+
+  Query Intent Distribution:
+    Commercial investigation  65.0%
+    Informational             20.0%
+    Transactional             15.0%
+
+================================================================================
+  RESPONSE STABILITY ANALYSIS (--diff)
+================================================================================
+
+  Stability score: 0.67 / 1.00 (moderately stable)
+
+  Stable fragments (appeared in 15+ of 20 runs):
+  ┌─────────────────────────────────────────────────────────────────────────────┐
+  │ "SEMrush and Ahrefs are widely considered the most comprehensive SEO       │
+  │  tools available, offering keyword research, site audits, backlink         │
+  │  analysis, and competitor tracking."                                       │
+  │                                                                            │
+  │ "For small businesses on a budget, free tools like Google Search Console,  │
+  │  Google Analytics, and Ubersuggest offer essential SEO capabilities."      │
+  │                                                                            │
+  │ "Moz offers a beginner-friendly interface with features like keyword       │
+  │  explorer and domain authority tracking."                                  │
+  └─────────────────────────────────────────────────────────────────────────────┘
+
+  Volatile fragments (appeared in fewer than 5 of 20 runs):
+  ┌─────────────────────────────────────────────────────────────────────────────┐
+  │ "Mangools is an underrated option that provides KWFinder for keyword       │
+  │  research at a lower price point than competitors."                        │
+  │                                                                            │
+  │ "SpyFu specializes in competitor keyword analysis and PPC research."       │
+  │                                                                            │
+  │ "Consider Rank Math as a WordPress SEO plugin alternative to Yoast for    │
+  │  on-page optimization."                                                   │
+  └─────────────────────────────────────────────────────────────────────────────┘
+
+  Diff summary:
+    Sentences stable across 75%+ of runs:    8
+    Sentences appearing in 25-75% of runs:   6
+    Sentences appearing in <25% of runs:     4
+    Total unique sentence variants:         18
+
+================================================================================
+  RECOMMENDATIONS FOR clearscope.io
+================================================================================
+
+  ✅ Strengths:
+     - 40% citation rate puts you in the recurring candidate set
+     - Consistently mentioned in content optimization context
+     - Average position 3.9 — middle of the pack but visible
+
+  ⚠️  Opportunities:
+     - Gap vs semrush.com (90%) and ahrefs.com (80%) — they dominate top positions
+     - Not appearing for "free seo tools" queries — consider a free tier or freemium
+       content strategy
+     - "content optimization tools seo" query (4/20) is your best entry point —
+       create content specifically targeting this query pattern
+     - Volatile mentions suggest your positioning isn't locked in yet — more
+       entity-rich, citation-worthy content could stabilize your presence
+
+================================================================================

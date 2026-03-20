@@ -43,6 +43,34 @@ ChatGPT's limited search behavior means traditional SEO and brand authority matt
 
 ---
 
+## Understanding Sample Sizes and Confidence
+
+We default to 20 samples per prompt. Here's what that means statistically:
+
+### What 20 Samples Tells You
+
+| Observed Rate | 95% Confidence Interval | Interpretation |
+|---------------|------------------------|----------------|
+| 0% (0/20) | 0% – 17% | Likely not cited, but can't rule out rare appearances |
+| 25% (5/20) | 9% – 49% | Weak signal — could be noise or genuine low-frequency citation |
+| 50% (10/20) | 27% – 73% | Directional — you're in the candidate set but not dominant |
+| 75% (15/20) | 51% – 91% | Strong signal — consistently part of the recurring retrieval set |
+| 100% (20/20) | 83% – 100% | Very strong — core part of the retrieval set for this prompt |
+
+### When to Use More Samples
+
+- **20 samples (default):** Good for directional insights, initial audits, and identifying obvious gaps. Sufficient for most AEO work.
+- **50 samples:** Better precision for competitive analysis where small differences matter. Recommended for source authority profiling and competitor monitoring.
+- **100 samples:** High-confidence measurements for reporting to stakeholders or making content investment decisions. The control run study showed 100 samples captures 74-100% of the query universe.
+
+### The Practical Reality
+
+For AEO, perfect precision isn't the goal — directional insight is. If your brand shows up 0/20 times for an important prompt, you have a problem regardless of confidence intervals. If you show up 15/20 times, you're winning. The edge cases (5-8/20) are where bumping to 50 samples helps clarify.
+
+All scripts accept `--runs N` to override the default.
+
+---
+
 ## Skills
 
 ### Core Pipeline

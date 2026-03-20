@@ -1,0 +1,107 @@
+================================================================================
+  AEO Prompt Frequency Analyzer — Results
+================================================================================
+
+  Prompt:    "how to do keyword research"
+  Model:     gemini-3-flash-preview (with Google Search grounding)
+  Runs:      20
+  Timestamp: 2026-03-19T14:31:42Z
+
+================================================================================
+  GROUNDING QUERY FREQUENCY
+================================================================================
+
+  Queries extracted from Gemini's grounding metadata across 20 runs.
+  Sorted by frequency (highest first).
+
+  Freq   Rate    Intent          Query
+  ─────  ──────  ──────────────  ─────────────────────────────────────────────
+  19/20  95.0%   Informational   how to do keyword research
+  15/20  75.0%   Informational   keyword research tutorial step by step
+  13/20  65.0%   Informational   keyword research for beginners
+  11/20  55.0%   Informational   how to find keywords for seo
+   9/20  45.0%   Commercial      best keyword research tools
+   8/20  40.0%   Informational   keyword research process steps
+   7/20  35.0%   Informational   how to choose keywords for a blog post
+   6/20  30.0%   Informational   long tail keyword research strategy
+   5/20  25.0%   Commercial      free keyword research tools 2026
+   4/20  20.0%   Informational   keyword difficulty analysis how to
+   4/20  20.0%   Informational   search intent keyword research
+   3/20  15.0%   Informational   keyword clustering and topic mapping
+   2/20  10.0%   Commercial      google keyword planner alternatives
+   2/20  10.0%   Informational   keyword research for content marketing
+   1/20   5.0%   Informational   competitor keyword gap analysis
+
+  Total unique queries: 15
+  Avg queries per run: 3.8
+
+================================================================================
+  INTENT DISTRIBUTION
+================================================================================
+
+  Intent Category          Count   Share
+  ───────────────────────  ──────  ──────
+  Informational              11    73.3%
+  Commercial Investigation    4    26.7%
+  Transactional               0     0.0%
+  Navigational                0     0.0%
+
+  Analysis: This prompt overwhelmingly triggers informational queries. Gemini
+  treats "how to do keyword research" as a learning/tutorial intent, pulling
+  step-by-step guides and beginner resources. The commercial queries that do
+  appear are tool-related — suggesting Gemini supplements how-to content with
+  tool recommendations.
+
+================================================================================
+  TOP SOURCES REFERENCED
+================================================================================
+
+  Sources extracted from grounding citations across all 20 runs.
+
+  Rank  Source Domain                    Citations  Rate
+  ────  ──────────────────────────────  ─────────  ───────
+   1    ahrefs.com                       17/20      85.0%
+   2    backlinko.com                    15/20      75.0%
+   3    semrush.com                      14/20      70.0%
+   4    moz.com                          12/20      60.0%
+   5    hubspot.com                       9/20      45.0%
+   6    searchenginejournal.com           7/20      35.0%
+   7    neilpatel.com                     6/20      30.0%
+   8    wordstream.com                    4/20      20.0%
+   9    contentmarketinginstitute.com     3/20      15.0%
+  10    surferseo.com                     2/20      10.0%
+
+  Unique sources across all runs: 18
+  Avg sources per response: 4.1
+
+  Notable: The top 4 sources (ahrefs, backlinko, semrush, moz) appear in 60%+
+  of runs — they form the "core citation set" for keyword research content.
+  These are the pages to study for content structure and entity coverage.
+
+================================================================================
+  QUERY CLUSTERS
+================================================================================
+
+  Cluster 1: Core Process (avg freq 63%)
+    ├── how to do keyword research
+    ├── keyword research tutorial step by step
+    ├── keyword research process steps
+    └── keyword research for beginners
+
+  Cluster 2: Strategy & Technique (avg freq 23%)
+    ├── long tail keyword research strategy
+    ├── search intent keyword research
+    ├── keyword clustering and topic mapping
+    └── keyword difficulty analysis how to
+
+  Cluster 3: Tools (avg freq 27%)
+    ├── best keyword research tools
+    ├── free keyword research tools 2026
+    └── google keyword planner alternatives
+
+  Cluster 4: Applied (avg freq 10%)
+    ├── how to choose keywords for a blog post
+    ├── keyword research for content marketing
+    └── competitor keyword gap analysis
+
+================================================================================

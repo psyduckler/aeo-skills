@@ -1,0 +1,179 @@
+================================================================================
+  AEO Source Authority Profiler — Results
+================================================================================
+
+  Prompt:    "best content optimization tools"
+  Model:     gemini-3-flash-preview (with Google Search grounding)
+  Runs:      20
+  Domain:    clearscope.io
+  Timestamp: 2026-03-19T14:45:19Z
+
+================================================================================
+  CITATION BLUEPRINT
+================================================================================
+
+  Aggregate profile of the top-cited pages for this prompt. This is what
+  "citation-worthy" content looks like for this topic.
+
+  Metric                     Average    Median     Range
+  ─────────────────────────  ─────────  ─────────  ──────────────
+  Word count                 3,247      3,100      1,800 – 5,400
+  Heading count (H2+H3)     14.2       13         8 – 22
+  Internal links             18.7       16         6 – 38
+  External links             12.3       11         4 – 24
+  Images                     8.4        7          3 – 18
+  Estimated reading time     13.2 min   12 min     7 – 22 min
+  Content freshness          4.2 mo     3 mo       1 – 14 mo
+
+  Schema Types Found:
+    Article              70% of top sources
+    FAQPage              40% of top sources
+    Product (Review)     30% of top sources
+    BreadcrumbList       60% of top sources
+    Organization         50% of top sources
+    ItemList             20% of top sources
+
+  Common Content Patterns:
+    ✅  Comparison tables (tool vs tool)          80% of cited pages
+    ✅  Pricing breakdowns                        70% of cited pages
+    ✅  Pros/cons lists per tool                  90% of cited pages
+    ✅  Screenshot or UI examples                 60% of cited pages
+    ✅  "Best for [use case]" categorization      50% of cited pages
+    ✅  Author byline with credentials            40% of cited pages
+
+================================================================================
+  TOP 10 CITED SOURCES — PROFILES
+================================================================================
+
+  #1  semrush.com/blog/content-optimization-tools/
+  ────────────────────────────────────────────────
+  Citations:    16/20 (80.0%)    Avg Position: 1.4
+  Word count:   4,200            Headings: 18
+  Schema:       Article, BreadcrumbList, FAQPage
+  Freshness:    Updated 2 months ago
+  Key entities: SEMrush, Clearscope, Surfer SEO, Frase, MarketMuse, Grammarly
+  Why cited:    Comprehensive comparison with pricing, extremely fresh, strong
+               domain authority, covers 15+ tools with structured sections.
+
+  #2  backlinko.com/content-optimization
+  ────────────────────────────────────────────────
+  Citations:    14/20 (70.0%)    Avg Position: 2.1
+  Word count:   3,800            Headings: 16
+  Schema:       Article, BreadcrumbList
+  Freshness:    Updated 3 months ago
+  Key entities: content optimization, NLP, TF-IDF, entity salience, E-E-A-T
+  Why cited:    Strong editorial authority (Brian Dean), methodology-focused,
+               well-structured with visual examples.
+
+  #3  searchenginejournal.com/content-optimization-tools/
+  ────────────────────────────────────────────────
+  Citations:    12/20 (60.0%)    Avg Position: 2.8
+  Word count:   3,400            Headings: 15
+  Schema:       Article, Organization
+  Freshness:    Updated 4 months ago
+  Key entities: SEMrush, Ahrefs, Clearscope, SurferSEO, Hemingway Editor
+  Why cited:    Established SEO publication, frequently updated content hub,
+               comparison table format with pricing.
+
+  #4  clearscope.io/blog/content-optimization
+  ────────────────────────────────────────────────
+  Citations:     8/20 (40.0%)    Avg Position: 3.4
+  Word count:   2,900            Headings: 12
+  Schema:       Article, BreadcrumbList, Organization
+  Freshness:    Updated 6 months ago
+  Key entities: content optimization, Clearscope, content grading, NLP, SERP
+  Why cited:    First-party authority on content optimization methodology,
+               practical examples with Clearscope workflow.
+
+  #5  hubspot.com/marketing/content-optimization-tools
+  ────────────────────────────────────────────────
+  Citations:     7/20 (35.0%)    Avg Position: 4.1
+  Word count:   2,600            Headings: 11
+  Schema:       Article, FAQPage, BreadcrumbList, Organization
+  Freshness:    Updated 5 months ago
+  Key entities: HubSpot, SEMrush, Yoast, keyword research, content strategy
+  Why cited:    Major marketing authority, comprehensive schema markup,
+               strong internal linking ecosystem.
+
+  #6  surferseo.com/blog/content-optimization/
+  ────────────────────────────────────────────────
+  Citations:     6/20 (30.0%)    Avg Position: 4.3
+  Word count:   3,100            Headings: 14
+  Schema:       Article, Product
+  Freshness:    Updated 1 month ago
+  Key entities: Surfer SEO, NLP, SERP analyzer, content score, audit
+  Why cited:    Very fresh content, product-focused but includes competitive
+               comparisons, strong technical depth.
+
+  #7  ahrefs.com/blog/content-optimization/
+  ────────────────────────────────────────────────
+  Citations:     5/20 (25.0%)    Avg Position: 3.9
+  Word count:   3,500            Headings: 13
+  Schema:       Article, BreadcrumbList
+  Freshness:    Updated 8 months ago
+  Key entities: Ahrefs, content audit, keyword cannibalization, internal linking
+  Why cited:    High domain authority, data-driven with original research,
+               strong backlink profile.
+
+  #8  frase.io/blog/content-optimization-tools/
+  ────────────────────────────────────────────────
+  Citations:     4/20 (20.0%)    Avg Position: 5.2
+  Word count:   2,200            Headings: 9
+  Schema:       Article
+  Freshness:    Updated 3 months ago
+  Key entities: Frase, AI content, content briefs, SERP analysis
+  Why cited:    First-party tool content, AI-focused angle differentiates
+               from competitors.
+
+  #9  contentmarketinginstitute.com/content-optimization/
+  ────────────────────────────────────────────────
+  Citations:     3/20 (15.0%)    Avg Position: 5.8
+  Word count:   2,100            Headings: 10
+  Schema:       Article, Organization
+  Freshness:    Updated 9 months ago
+  Key entities: content marketing, editorial workflow, content governance
+  Why cited:    Industry thought leadership, non-commercial perspective,
+               methodology-focused.
+
+  #10 neilpatel.com/blog/content-optimization/
+  ────────────────────────────────────────────────
+  Citations:     3/20 (15.0%)    Avg Position: 5.6
+  Word count:   5,400            Headings: 22
+  Schema:       Article, FAQPage
+  Freshness:    Updated 14 months ago
+  Key entities: Neil Patel, Ubersuggest, SEO, keyword density, readability
+  Why cited:    Highest word count, extensive coverage, personal brand authority.
+               Declining freshness likely limiting citation rate.
+
+================================================================================
+  DOMAIN COMPARISON — clearscope.io vs TOP SOURCES
+================================================================================
+
+  Metric              clearscope.io   Top 3 Avg    Gap
+  ──────────────────  ──────────────  ───────────  ─────────────────
+  Citation rate       40.0%           70.0%        -30.0 pp
+  Avg position        3.4             2.1          -1.3 positions
+  Word count          2,900           3,800        -900 words
+  Headings            12              16           -4 headings
+  Schema types        3               2.3          +0.7 (advantage)
+  Content freshness   6 months        3 months     -3 months stale
+  External links      8               15           -7 links
+
+  Key Gaps to Close:
+  ───────────────────
+  🔴 CRITICAL — Content freshness: 6 months old vs top sources at 1-3 months.
+     Refresh the page with 2026 tool updates and new pricing.
+
+  🟡 IMPORTANT — Word count: 900 words shorter than top 3 average. Add
+     sections covering 3-4 more tools (MarketMuse, Dashword, WriterZen)
+     and expand comparison tables.
+
+  🟢 STRENGTH — Schema markup: More diverse schema types than most competitors.
+     Continue leveraging structured data — add ItemList schema for the
+     tool comparison section.
+
+  🟡 IMPORTANT — External links: 8 vs 15 average. Cite more third-party
+     sources (industry studies, G2 reviews, case studies) to increase
+     the page's authority signals.
+
+================================================================================

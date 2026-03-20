@@ -1,0 +1,130 @@
+================================================================================
+  AEO Entity Extractor — Results
+================================================================================
+
+  Prompt:    "what are the best seo tools"
+  Model:     gemini-3-flash-preview (with Google Search grounding)
+  Runs:      20
+  Timestamp: 2026-03-19T15:02:33Z
+
+================================================================================
+  ENTITIES BY TYPE
+================================================================================
+
+  Entities extracted from 20 grounded responses. Frequency indicates how many
+  of the 20 responses mentioned each entity.
+
+  ─── BRANDS / COMPANIES ────────────────────────────────────────────────────────
+
+  Freq   Rate    Entity
+  ─────  ──────  ──────────────────────────────────────────
+  20/20  100.0%  SEMrush
+  19/20   95.0%  Ahrefs
+  18/20   90.0%  Google (Search Console / Analytics)
+  15/20   75.0%  Moz
+  11/20   55.0%  HubSpot
+   9/20   45.0%  Clearscope
+   8/20   40.0%  Surfer SEO
+   7/20   35.0%  Yoast
+   6/20   30.0%  Screaming Frog
+   5/20   25.0%  Majestic
+   4/20   20.0%  SpyFu
+   3/20   15.0%  Mangools (KWFinder)
+   3/20   15.0%  Ubersuggest
+   2/20   10.0%  BrightEdge
+   2/20   10.0%  Conductor
+   1/20    5.0%  Dashword
+
+  ─── TOOLS / FEATURES ─────────────────────────────────────────────────────────
+
+  Freq   Rate    Entity
+  ─────  ──────  ──────────────────────────────────────────
+  18/20   90.0%  keyword research
+  17/20   85.0%  backlink analysis
+  16/20   80.0%  site audit
+  15/20   75.0%  rank tracking
+  13/20   65.0%  competitor analysis
+  11/20   55.0%  content optimization
+  10/20   50.0%  SERP analysis
+   8/20   40.0%  technical SEO audit
+   7/20   35.0%  keyword difficulty score
+   6/20   30.0%  domain authority
+   5/20   25.0%  content grading
+   4/20   20.0%  link building
+   3/20   15.0%  local SEO
+   2/20   10.0%  schema markup analysis
+
+  ─── PEOPLE ────────────────────────────────────────────────────────────────────
+
+  Freq   Rate    Entity
+  ─────  ──────  ──────────────────────────────────────────
+   6/20   30.0%  Brian Dean (Backlinko)
+   5/20   25.0%  Neil Patel
+   4/20   20.0%  Rand Fishkin (Moz / SparkToro)
+   2/20   10.0%  Dmitry Gerasimenko (Ahrefs)
+   1/20    5.0%  Cyrus Shepard (Zyppy)
+
+  ─── STATISTICS / METRICS ──────────────────────────────────────────────────────
+
+  Freq   Rate    Entity
+  ─────  ──────  ──────────────────────────────────────────
+  12/20   60.0%  "SEMrush has over 10 million users"
+   9/20   45.0%  "Ahrefs crawls 8 billion pages per day"
+   7/20   35.0%  "Moz Domain Authority is used by 500K+ sites"
+   5/20   25.0%  "Google Search Console is free"
+   4/20   20.0%  "67% of all clicks go to the top 5 results"
+   3/20   15.0%  "SEMrush pricing starts at $139.95/month"
+   2/20   10.0%  "Ahrefs starts at $129/month"
+   2/20   10.0%  "Clearscope pricing starts at $189/month"
+
+  ─── CONCEPTS / METHODOLOGIES ──────────────────────────────────────────────────
+
+  Freq   Rate    Entity
+  ─────  ──────  ──────────────────────────────────────────
+  14/20   70.0%  search engine optimization (SEO)
+  10/20   50.0%  on-page SEO
+   9/20   45.0%  off-page SEO
+   8/20   40.0%  technical SEO
+   7/20   35.0%  E-E-A-T (Experience, Expertise, Authoritativeness, Trust)
+   5/20   25.0%  NLP / natural language processing
+   4/20   20.0%  TF-IDF
+   3/20   15.0%  PageRank
+   2/20   10.0%  topical authority
+
+================================================================================
+  ENTITY SUMMARY
+================================================================================
+
+  Category                Total Unique    Avg per Response
+  ──────────────────────  ────────────    ────────────────
+  Brands / Companies      16              7.3
+  Tools / Features        14              6.8
+  People                   5              1.2
+  Statistics / Metrics     8              2.4
+  Concepts                 9              3.1
+
+  Total unique entities:  52
+  Avg entities per run:   20.8
+
+================================================================================
+  ENTITY GAP ANALYSIS (for content targeting this prompt)
+================================================================================
+
+  Must-include entities (80%+ frequency — core to every response):
+    ✅ SEMrush, Ahrefs, Google Search Console
+    ✅ keyword research, backlink analysis, site audit
+
+  Should-include entities (40-80% — frequently referenced):
+    ✅ Moz, HubSpot, Clearscope, Surfer SEO
+    ✅ rank tracking, competitor analysis, content optimization
+    ✅ Brian Dean, Neil Patel
+
+  Nice-to-have entities (15-40% — add depth and differentiation):
+    ✅ Yoast, Screaming Frog, SpyFu, Majestic
+    ✅ E-E-A-T, domain authority, technical SEO
+    ✅ Pricing statistics for major tools
+
+  Missing from your content? Compare this entity list against your page to
+  find gaps that could improve your citation likelihood.
+
+================================================================================

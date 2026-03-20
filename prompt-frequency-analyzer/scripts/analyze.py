@@ -12,115 +12,23 @@ Requires: GEMINI_API_KEY env var
 import argparse
 import json
 import os
-import re
 import sys
-import time
-import urllib.request
-import urllib.error
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-
-def classify_intent(query: str) -> str:
-    """Classify search query intent using keyword/pattern matching.
-
-    Returns one of: informational, commercial, navigational, transactional
-    """
-    q = query.strip().lower()
-
-    # Transactional — strongest signals, check first
-    transactional_patterns = [
-        r'\bbuy\b', r'\bpurchase\b', r'\border\b', r'\bsubscribe\b',
-        r'\bdownload\b', r'\binstall\b', r'\bget started\b',
-        r'\bfree trial\b', r'\btrial\b', r'\bdiscount\b', r'\bcoupon\b',
-        r'\bpromo\b', r'\bdeal\b', r'\bpricing\b', r'\bprice\b',
-        r'\bcost\b', r'\bcheap\b', r'\baffordable\b', r'\bsign up\b',
-        r'\bregister\b', r'\bcheckout\b',
-    ]
-    for pat in transactional_patterns:
-        if re.search(pat, q):
-            return "transactional"
-
-    # Navigational — brand/domain references
-    navigational_patterns = [
-        r'\blogin\b', r'\blog in\b', r'\bsign in\b', r'\bsignin\b',
-        r'\bwebsite\b', r'\bofficial\b', r'\bhomepage\b',
-        r'\b\w+\.(com|org|net|io|ai|co|dev)\b',  # domain names
-        r'\bapp\b', r'\bportal\b', r'\bdashboard\b', r'\baccount\b',
-    ]
-    for pat in navigational_patterns:
-        if re.search(pat, q):
-            return "navigational"
-
-    # Commercial — comparison/evaluation signals
-    commercial_patterns = [
-        r'\bbest\b', r'\btop\b', r'\bvs\b', r'\bversus\b', r'\bcompare\b',
-        r'\bcomparison\b', r'\breview\b', r'\breviews\b', r'\brating\b',
-        r'\brated\b', r'\brecommend\b', r'\balternative\b', r'\balternatives\b',
-        r'\bpros and cons\b', r'\bworth it\b', r'\bshould i\b',
-        r'\bwhich\b.*\bbetter\b', r'\bbetter than\b',
-    ]
-    for pat in commercial_patterns:
-        if re.search(pat, q):
-            return "commercial"
-
-    # Informational — default / knowledge-seeking
-    # Also matches explicit info patterns, but we return informational as default anyway
-    return "informational"
-
-
-def call_gemini(prompt: str, api_key: str, model: str) -> dict:
-    """Call Gemini API with Google Search grounding. Returns parsed JSON response."""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-    payload = json.dumps({
-        "contents": [{"parts": [{"text": prompt}]}],
-        "tools": [{"google_search": {}}],
-    }).encode()
-    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-    for attempt in range(3):
-        try:
-            with urllib.request.urlopen(req, timeout=180) as resp:
-                return json.loads(resp.read())
-        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
-            if attempt < 2:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": str(e)}
-
-
-def extract_queries(response: dict) -> list[str]:
-    """Extract web search queries from Gemini grounding metadata."""
-    queries = []
-    for cand in response.get("candidates", []):
-        meta = cand.get("groundingMetadata", {})
-        queries.extend(meta.get("webSearchQueries", []))
-    return queries
-
-
-def extract_sources(response: dict) -> list[dict]:
-    """Extract grounding source URLs from Gemini response."""
-    sources = []
-    seen = set()
-    for cand in response.get("candidates", []):
-        meta = cand.get("groundingMetadata", {})
-        for chunk in meta.get("groundingChunks", []):
-            web = chunk.get("web", {})
-            uri = web.get("uri", "")
-            title = web.get("title", "")
-            if uri and uri not in seen:
-                seen.add(uri)
-                sources.append({"title": title, "uri": uri})
-    return sources
+# ── Shared imports ──────────────────────────────────────────────────────────
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from shared.gemini_client import (
+    call_gemini, extract_queries, extract_sources, classify_intent, get_api_key,
+    DEFAULT_MODEL, DEFAULT_RUNS, DEFAULT_CONCURRENCY,
+)
 
 
 def run_analysis(prompt: str, runs: int, model: str, concurrency: int):
     """Run prompt N times and collect search query data."""
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("Error: GEMINI_API_KEY environment variable required", file=sys.stderr)
-        sys.exit(1)
+    api_key = get_api_key()
 
-    all_run_queries = []  # list of lists
+    all_run_queries = []
     all_sources = []
     errors = 0
 
@@ -157,13 +65,11 @@ def run_analysis(prompt: str, runs: int, model: str, concurrency: int):
                 query_run_count[ql] += 1
                 seen_in_run.add(ql)
 
-    # Sort by frequency desc
     sorted_queries = sorted(query_run_count.items(), key=lambda x: (-x[1], x[0]))
 
     # Source frequency
     source_count = defaultdict(int)
     for s in all_sources:
-        # Extract domain from title (which is usually the domain in Gemini grounding)
         domain = s.get("title", s.get("uri", ""))
         source_count[domain] += 1
     sorted_sources = sorted(source_count.items(), key=lambda x: (-x[1], x[0]))
@@ -181,7 +87,6 @@ def run_analysis(prompt: str, runs: int, model: str, concurrency: int):
             "intent": intent,
         })
 
-    # Intent distribution as percentages
     total_unique = len(sorted_queries)
     intent_distribution = {}
     for intent_type in ["informational", "commercial", "navigational", "transactional"]:
@@ -234,9 +139,9 @@ def format_text(result: dict) -> str:
 def main():
     parser = argparse.ArgumentParser(description="Analyze Gemini search query frequency for a prompt")
     parser.add_argument("prompt", help="The prompt to analyze")
-    parser.add_argument("--runs", type=int, default=20, help="Number of runs (default: 20)")
-    parser.add_argument("--model", default="gemini-3-flash-preview", help="Gemini model (default: gemini-3-flash-preview)")
-    parser.add_argument("--concurrency", type=int, default=5, help="Max concurrent requests (default: 5)")
+    parser.add_argument("--runs", type=int, default=DEFAULT_RUNS, help="Number of runs (default: 20)")
+    parser.add_argument("--model", default=DEFAULT_MODEL, help="Gemini model (default: gemini-3-flash-preview)")
+    parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY, help="Max concurrent requests (default: 5)")
     parser.add_argument("--output", choices=["json", "text"], default="text", help="Output format")
     args = parser.parse_args()
 

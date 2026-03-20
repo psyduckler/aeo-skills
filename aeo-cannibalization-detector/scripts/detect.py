@@ -13,72 +13,17 @@ Requires: GEMINI_API_KEY env var
 import argparse
 import json
 import os
-import re
 import sys
-import time
-import urllib.request
-import urllib.error
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse
 
-
-# ── Gemini API ──────────────────────────────────────────────────────────────
-
-def call_gemini(prompt: str, api_key: str, model: str) -> dict:
-    """Call Gemini API with Google Search grounding."""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-    payload = json.dumps({
-        "contents": [{"parts": [{"text": prompt}]}],
-        "tools": [{"google_search": {}}],
-    }).encode()
-    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-    for attempt in range(5):
-        try:
-            with urllib.request.urlopen(req, timeout=180) as resp:
-                return json.loads(resp.read())
-        except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt < 4:
-                wait = (2 ** attempt) + 1
-                print(f"    Rate limited, waiting {wait}s...", file=sys.stderr)
-                time.sleep(wait)
-            elif attempt < 4:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": f"HTTP {e.code}: {e.reason}"}
-        except (urllib.error.URLError, TimeoutError, OSError) as e:
-            if attempt < 4:
-                time.sleep(2 ** attempt)
-            else:
-                return {"error": str(e)}
-
-
-def extract_sources(response: dict) -> list:
-    """Extract grounding source URLs and titles from Gemini response."""
-    sources = []
-    seen = set()
-    for cand in response.get("candidates", []):
-        meta = cand.get("groundingMetadata", {})
-        for chunk in meta.get("groundingChunks", []):
-            web = chunk.get("web", {})
-            uri = web.get("uri", "")
-            title = web.get("title", "")
-            if uri and uri not in seen:
-                seen.add(uri)
-                sources.append({"title": title, "uri": uri})
-    return sources
-
-
-def get_domain(uri: str) -> str:
-    """Extract clean domain from URI."""
-    try:
-        parsed = urlparse(uri)
-        domain = parsed.netloc.lower()
-        if domain.startswith("www."):
-            domain = domain[4:]
-        return domain
-    except Exception:
-        return ""
+# ── Shared imports ──────────────────────────────────────────────────────────
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from shared.gemini_client import (
+    call_gemini, extract_sources, extract_domain, domain_matches, get_api_key,
+    DEFAULT_MODEL, DEFAULT_RUNS, DEFAULT_CONCURRENCY,
+)
 
 
 def get_path(uri: str) -> str:
@@ -126,18 +71,17 @@ def analyze_prompt(prompt: str, domain: str, runs: int, model: str,
             "cannibalization": None,
         }
 
-    # Extract domain URLs across all runs
     target = domain.lower()
     if target.startswith("www."):
         target = target[4:]
 
-    url_run_count = defaultdict(int)  # how many runs each URL was cited in
+    url_run_count = defaultdict(int)
     url_titles = {}
 
     for run_sources in run_results:
         seen_in_run = set()
         for src in run_sources:
-            src_domain = get_domain(src["uri"])
+            src_domain = extract_domain(src["uri"])
             if target in src_domain and src["uri"] not in seen_in_run:
                 url_run_count[src["uri"]] += 1
                 seen_in_run.add(src["uri"])
@@ -147,7 +91,6 @@ def analyze_prompt(prompt: str, domain: str, runs: int, model: str,
     domain_urls = dict(url_run_count)
     total_domain_urls = len(domain_urls)
 
-    # No cannibalization if 0 or 1 URL
     if total_domain_urls <= 1:
         single_url = list(domain_urls.keys())[0] if domain_urls else None
         single_rate = round(domain_urls[single_url] / successful_runs * 100) if single_url else 0
@@ -164,7 +107,6 @@ def analyze_prompt(prompt: str, domain: str, runs: int, model: str,
             },
         }
 
-    # Multiple URLs found — analyze competition
     url_rates = {}
     for url, count in domain_urls.items():
         rate = round(count / successful_runs * 100)
@@ -175,7 +117,6 @@ def analyze_prompt(prompt: str, domain: str, runs: int, model: str,
             "path": get_path(url),
         }
 
-    # Determine severity
     max_rate = max(r["citation_rate"] for r in url_rates.values())
     if max_rate > 80:
         severity = "LOW"
@@ -217,10 +158,7 @@ def analyze_prompt(prompt: str, domain: str, runs: int, model: str,
 
 def run_detector(domain: str, prompts: list, runs: int, model: str, concurrency: int):
     """Run cannibalization detection across all prompts."""
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("Error: GEMINI_API_KEY environment variable required", file=sys.stderr)
-        sys.exit(1)
+    api_key = get_api_key()
 
     print(f"Cannibalization Detector — {domain}", file=sys.stderr)
     print(f"Prompts: {len(prompts)} | Model: {model} | Runs per prompt: {runs}", file=sys.stderr)
@@ -230,7 +168,6 @@ def run_detector(domain: str, prompts: list, runs: int, model: str, concurrency:
         result = analyze_prompt(prompt, domain, runs, model, concurrency, api_key)
         results.append(result)
 
-    # Summary
     cannibalized = [r for r in results if r.get("cannibalization", {}).get("detected")]
     severity_counts = defaultdict(int)
     for r in cannibalized:
@@ -245,7 +182,6 @@ def run_detector(domain: str, prompts: list, runs: int, model: str, concurrency:
         "worst_offenders": [],
     }
 
-    # Find worst offenders (HIGH severity first, then MEDIUM)
     for r in sorted(cannibalized, key=lambda x: {"HIGH": 0, "MEDIUM": 1, "LOW": 2}.get(
             x["cannibalization"]["severity"], 3)):
         summary["worst_offenders"].append({
@@ -271,7 +207,6 @@ def format_text(data: dict) -> str:
     lines.append(f"Model: {data['model']} | Runs per prompt: {data['runs_per_prompt']}")
     lines.append("")
 
-    # Per-prompt results
     lines.append("RESULTS BY PROMPT:")
     lines.append("=" * 70)
 
@@ -305,7 +240,6 @@ def format_text(data: dict) -> str:
 
         lines.append(f"  → {cannibal['recommendation']}")
 
-    # Summary
     s = data["summary"]
     lines.append("")
     lines.append("SUMMARY:")
@@ -337,17 +271,16 @@ def main():
                         help="Your domain to check (e.g., example.com)")
     parser.add_argument("--prompts-file",
                         help="File with one prompt per line (in addition to positional prompts)")
-    parser.add_argument("--runs", type=int, default=20,
+    parser.add_argument("--runs", type=int, default=DEFAULT_RUNS,
                         help="Runs per prompt (default: 20)")
-    parser.add_argument("--model", default="gemini-3-flash-preview",
+    parser.add_argument("--model", default=DEFAULT_MODEL,
                         help="Gemini model (default: gemini-3-flash-preview)")
-    parser.add_argument("--concurrency", type=int, default=5,
+    parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY,
                         help="Max concurrent requests (default: 5)")
     parser.add_argument("--output", choices=["text", "json"], default="text",
                         help="Output format (default: text)")
     args = parser.parse_args()
 
-    # Collect prompts from args and file
     all_prompts = list(args.prompts) if args.prompts else []
     if args.prompts_file:
         try:
