@@ -63,6 +63,7 @@ def test_every_skill_has_shared_module():
     """
     expected_skills = [
         'aeo-ai-overview-simulator',
+        'aeo-baseline',
         'aeo-cannibalization-detector',
         'aeo-citation-gap-finder',
         'aeo-competitor-monitor',

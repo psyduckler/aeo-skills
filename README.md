@@ -103,7 +103,15 @@ All scripts accept `--runs N` to override the default. See [METHODOLOGY.md](METH
 
 ## Skills
 
-### Core Pipeline
+### v2 Core (new)
+
+The streamlined v2 measurement core. Built against [`schemas/aeo-evidence-v1.json`](schemas/aeo-evidence-v1.json) and [METHODOLOGY.md](METHODOLOGY.md). More v2 skills land in subsequent PRs.
+
+| Skill | Description | Link |
+|-------|-------------|------|
+| **aeo-baseline** | Atomic AI visibility measurement. Runs each configured prompt 20× against Gemini with grounding, extracts every signal (mentions, citations, position, query fan-out, entities, sentiment, competitors) from the same 20 responses, computes Wilson 95% CIs, and writes one append-only JSON evidence file. Built-in `--doctor` and `--estimate-cost` modes; honors spend caps. | [→ Skill](./aeo-baseline/) |
+
+### Core Pipeline (v1)
 
 The AEO loop: **Research → Create → Measure → Repeat**
 
