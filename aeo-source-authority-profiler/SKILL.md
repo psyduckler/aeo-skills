@@ -145,7 +145,7 @@ Structured JSON with `profiles` (per-page data), `blueprint` (aggregate pattern)
 
 - Use the blueprint as a **content spec** — match the word count, heading structure, and entity density of pages in the recurring retrieval set
 - If your domain isn't in the top results, the blueprint tells you what to aim for to enter the candidate set
-- Pages with JSON-LD schema (especially Article, FAQ) get cited more often — use `aeo-schema-optimizer` to add it
+- Pages with JSON-LD schema (especially Article, FAQ) get cited more often — use `aeo-schema` to add it
 - Run for your most important prompts and compare blueprints — different query types may need different content profiles
 - Pair with `aeo-content-free` to create content that matches the blueprint
 - Pair with `aeo-ai-overview-simulator` for deeper citation rate tracking over time
