@@ -164,3 +164,34 @@ jobs:
             exit 1
           fi
           echo "Discovered $count skills"
+
+      - name: Cold install — single-skill installation works standalone
+        run: |
+          # Regression test for the v1 bug where skills depended on a sibling
+          # /shared/ folder that wasn't present in --skill installs. We install
+          # a single Python-using skill to a fresh location and verify its
+          # scripts run --help cleanly (proves _shared.py is vendored correctly).
+          set -e
+          mkdir -p /tmp/cold-install-target && cd /tmp/cold-install-target
+          NO_COLOR=1 FORCE_COLOR=0 npx -y skills@latest add "$GITHUB_WORKSPACE" \
+            --skill aeo-baseline --copy -y \
+            -a claude-code 2>&1 | sed -r 's/\x1B\[[0-9;]*[mK]//g' | tail -20
+          # The skill should now be installed as a directory we can find
+          INSTALLED=$(find /tmp/cold-install-target -name "baseline.py" -path "*aeo-baseline*" 2>/dev/null | head -1)
+          if [ -z "$INSTALLED" ]; then
+            echo "::error::aeo-baseline did not install to a discoverable location"
+            find /tmp/cold-install-target -type f | head -20
+            exit 1
+          fi
+          echo "Installed at: $INSTALLED"
+          # Verify the script + its vendored _shared.py work standalone
+          SCRIPT_DIR=$(dirname "$INSTALLED")
+          ls -la "$SCRIPT_DIR"
+          python3 "$INSTALLED" --help > /dev/null
+          # Also verify --doctor exits cleanly when key is missing (no traceback)
+          (cd /tmp/cold-install-target && unset GEMINI_API_KEY && python3 "$INSTALLED" --doctor 2>&1 || true) | tee /tmp/doctor-out.txt
+          if grep -q "Traceback" /tmp/doctor-out.txt; then
+            echo "::error::baseline.py --doctor crashed with traceback when GEMINI_API_KEY missing"
+            exit 1
+          fi
+          echo "✓ Cold install verified: aeo-baseline works standalone"

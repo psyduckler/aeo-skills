@@ -5,42 +5,89 @@
 
 Open-source agent skills that measure, track, and improve a brand's visibility in AI answer engines (Gemini AI Overviews, ChatGPT, Perplexity). **BYOK** (bring your own Gemini key), **evidence-first** (every metric traces back to a raw response), **no vendor lock-in** (data lives in your project as JSON).
 
-## Quickstart
+## Quickstart — The v2 loop end-to-end
+
+Set up AI visibility tracking for a brand in about 5 minutes. Works with Claude Code, Cursor, Codex, OpenCode, and [50+ other agents](https://skills.sh/docs).
 
 ```bash
-# 1. Install all skills into your agent (Claude Code, Cursor, Codex, OpenCode, etc.)
+# 1. Install all skills into your agent
 npx skills add psyduckler/aeo-skills
 
-# 2. Set your Gemini key (free from aistudio.google.com)
-export GEMINI_API_KEY="your_key_here"
+# 2. Get a free Gemini API key from aistudio.google.com, then:
+mkdir my-aeo-project && cd my-aeo-project
+echo "GEMINI_API_KEY=your_key_here" > .env
+echo .env >> .gitignore
 
-# 3. Ask your agent: "Use aeo-analytics-free to track AI visibility for tabiji.ai"
+# 3. Create the workspace config
+python3 ../path/to/aeo-init/scripts/init.py \
+  --brand "Acme" --domain "acme.com" \
+  --competitor "competitor1.com" --competitor "competitor2.com" \
+  --prompt "best tools for X" --prompt-intent commercial \
+  --prompt "Acme vs competitor1" --prompt-intent vendor_comparison
+
+# 4. Verify the API key
+source .env
+python3 ../path/to/aeo-baseline/scripts/baseline.py --doctor
+
+# 5. Take your first baseline (uses ~$0.01 in Gemini credits per prompt)
+python3 ../path/to/aeo-baseline/scripts/baseline.py
+
+# 6. Schedule daily tracking
+python3 ../path/to/aeo-track/scripts/track.py --install --apply
+
+# 7. After a few days, generate a visibility report
+python3 ../path/to/aeo-report/scripts/report.py
+open aeo-reports/*.html
+
+# 8. Ask your agent for action recommendations
+# (in your agent's chat: "Use aeo-optimize to recommend what content to fix next")
 ```
 
-The skills.sh CLI works with [Claude Code, Cursor, Codex, OpenCode, and 50+ other agents](https://skills.sh/docs).
+> The actual paths to scripts depend on where `npx skills add` placed them — typically under `~/.claude/skills/` (Claude Code) or your agent's equivalent. Your agent can find them automatically. If you cloned the repo manually, use absolute paths to the `scripts/` folders.
+
+### Starter prompt packs
+
+Skip handcrafting prompts — install a vertical pack:
+
+```bash
+# B2B SaaS, local services, or AI tools (more verticals via community PRs)
+npx skills add psyduckler/aeo-skills --skill aeo-pack-b2b-saas
+```
+
+Then ask your agent to merge the pack's prompts into your `aeo.config.json`.
 
 ### Alternative installs
 
 ```bash
-# ClawHub (for OpenClaw agents)
-clawhub install psyduckler/aeo-analytics-free
+# Single skill (each is self-contained — no shared/ deps)
+npx skills add psyduckler/aeo-skills --skill aeo-baseline
 
-# Manual: clone and point your agent at the skill folders
+# ClawHub
+clawhub install psyduckler/aeo-baseline
+
+# Manual clone
 git clone https://github.com/psyduckler/aeo-skills
 ```
 
-### Install a single skill
+## The v2 architecture
 
-```bash
-# Only install the analytics tracker (skills are self-contained)
-npx skills add psyduckler/aeo-skills --skill aeo-analytics-free
+A six-skill measurement core + a growing prompt-pack library, all reading and writing one [public evidence schema](schemas/aeo-evidence-v1.json) under one [versioned methodology](METHODOLOGY.md).
+
+```
+aeo-init      → writes aeo.config.json
+   ↓
+aeo-baseline  → 20× sample of each prompt, writes aeo-data/<ts>.json (the evidence)
+   ↓
+aeo-track     → schedules baseline (launchd/cron)
+   ↓
+aeo-report    → trends, decay, hubs, cannibalization → Markdown + HTML + SVG
+   ↓
+aeo-optimize  → prioritized action plan from the evidence
+   ↓
+aeo-schema    → executes "add JSON-LD" recommendations
 ```
 
-## What's coming in v2
-
-A streamlined six-skill suite (`aeo-init`, `aeo-baseline`, `aeo-track`, `aeo-report`, `aeo-optimize`, `aeo-schema`) plus a single public **evidence schema** (`schemas/aeo-evidence-v1.json`) and **methodology document** ([METHODOLOGY.md](METHODOLOGY.md)) that every skill reads from and writes to.
-
-The v1 skills below remain installable. v2 is being developed in parallel and will land on this branch as it stabilizes.
+Plus vertical prompt packs (`aeo-pack-*`) for industry-specific starter prompts and a suite of v1 skills (kept available) covering complementary workflows.
 
 ---
 

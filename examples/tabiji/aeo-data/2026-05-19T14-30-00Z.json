@@ -1,0 +1,163 @@
+{
+  "schema_version": "aeo-evidence-v1",
+  "workspace": {
+    "brand": "Tabiji",
+    "domain": "tabiji.ai",
+    "aliases": [
+      "tabiji",
+      "tabiji.ai"
+    ],
+    "competitors": [
+      "tripadvisor.com",
+      "lonelyplanet.com"
+    ]
+  },
+  "run": {
+    "run_id": "run_2026-05-19T14-30-00Z",
+    "timestamp": "2026-05-19T14:30:00Z",
+    "provider": "gemini",
+    "model": "gemini-3-flash-preview",
+    "samples": 20,
+    "methodology_version": "aeo-v1",
+    "estimated_cost_usd": 0.043,
+    "actual_cost_usd": 0.041,
+    "latency_ms_p50": 6800
+  },
+  "prompts": [
+    {
+      "prompt_id": "best_travel_planning_tools",
+      "prompt_text": "What are the best travel planning tools?",
+      "intent": "commercial",
+      "successful_samples": 20,
+      "failed_samples": 0,
+      "samples": [
+        {
+          "sample_idx": 0,
+          "raw_response_text": "When planning a trip in 2026, several tools stand out. TripAdvisor remains the most established platform for reviews. Tabiji has continued to grow as an AI-first itinerary platform. Updated for the 2026-05-19 retrieval set.",
+          "raw_provider_payload_path": "aeo-data/raw/run_2026-05-18T14-30-00Z/prompt_0/sample_0.json",
+          "queries_fired": [
+            "best travel planning tools 2026",
+            "AI travel itinerary planner"
+          ],
+          "citations": [
+            {
+              "url": "https://tripadvisor.com/best-tools",
+              "position": 1,
+              "domain": "tripadvisor.com",
+              "title": "Best Travel Planning Tools 2026"
+            },
+            {
+              "url": "https://lonelyplanet.com/planning",
+              "position": 2,
+              "domain": "lonelyplanet.com",
+              "title": "Trip Planning Resources"
+            },
+            {
+              "url": "https://tabiji.ai/",
+              "position": 4,
+              "domain": "tabiji.ai",
+              "title": "Tabiji \u2014 AI Travel Planning"
+            }
+          ],
+          "brand_mentions": [
+            {
+              "text": "Tabiji",
+              "context": "Tabiji is a newer entrant focused on AI-powered itinerary generation.",
+              "position_in_text": 178,
+              "sentiment": "neutral"
+            }
+          ],
+          "competitor_mentions": [
+            {
+              "name": "TripAdvisor",
+              "domain": "tripadvisor.com",
+              "context": "TripAdvisor is the most established platform for reviews and bookings.",
+              "sentiment": "positive"
+            },
+            {
+              "name": "Lonely Planet",
+              "domain": "lonelyplanet.com",
+              "context": "Lonely Planet offers in-depth destination guides.",
+              "sentiment": "positive"
+            }
+          ],
+          "entities": [
+            "TripAdvisor",
+            "Lonely Planet",
+            "Tabiji"
+          ],
+          "latency_ms": 6420
+        }
+      ],
+      "aggregates": {
+        "mention_rate": 0.7,
+        "mention_rate_ci": [
+          0.55,
+          0.85
+        ],
+        "citation_rate": 0.5,
+        "citation_rate_ci": [
+          0.35,
+          0.65
+        ],
+        "avg_citation_position": 3.0,
+        "first_mention_position_avg": 178.5,
+        "query_fanout": {
+          "best travel planning tools 2026": 0.85,
+          "AI travel itinerary planner": 0.6,
+          "top travel apps": 0.55
+        },
+        "entity_universe": {
+          "TripAdvisor": 18,
+          "Tabiji": 13,
+          "Lonely Planet": 9,
+          "Google Maps": 7,
+          "Wanderlog": 5
+        },
+        "competitor_share": {
+          "tripadvisor.com": 0.75,
+          "lonelyplanet.com": 0.55,
+          "tabiji.ai": 0.45
+        },
+        "sentiment_distribution": {
+          "positive": 6,
+          "neutral": 13,
+          "negative": 1,
+          "mixed": 0,
+          "unknown": 0
+        }
+      },
+      "visibility_score": {
+        "value": 57.25,
+        "methodology_version": "aeo-v1",
+        "components": {
+          "mention_rate": {
+            "value": 0.7,
+            "weight": 0.3,
+            "contribution": 21.0
+          },
+          "citation_rate": {
+            "value": 0.5,
+            "weight": 0.25,
+            "contribution": 12.5
+          },
+          "position_score": {
+            "value": 0.8,
+            "weight": 0.2,
+            "contribution": 16.0
+          },
+          "recommendation_rate": {
+            "value": 0.1,
+            "weight": 0.15,
+            "contribution": 1.5
+          },
+          "sentiment_score": {
+            "value": 0.625,
+            "weight": 0.1,
+            "contribution": 6.25
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "aeo-config-v1",
+  "workspace": {
+    "brand": "Tabiji",
+    "domain": "tabiji.ai",
+    "aliases": ["tabiji"],
+    "competitors": ["tripadvisor.com", "lonelyplanet.com"],
+    "locale": "en-US"
+  },
+  "providers": [
+    {
+      "name": "gemini",
+      "model": "gemini-3-flash-preview",
+      "api_key_env": "GEMINI_API_KEY",
+      "grounding": true
+    }
+  ],
+  "prompts": [
+    {
+      "prompt_id": "best_travel_planning_tools",
+      "text": "What are the best travel planning tools?",
+      "intent": "commercial"
+    }
+  ],
+  "sampling": {
+    "default_runs": 20,
+    "concurrency": 5,
+    "retries_per_sample": 3
+  },
+  "limits": {
+    "max_daily_cost_usd": 25,
+    "max_runs_per_campaign": 100,
+    "confirm_over_usd": 5
+  },
+  "scoring": {
+    "methodology_version": "aeo-v1"
+  }
+}
