@@ -48,6 +48,51 @@ jobs:
           "
           done
 
+      - name: Validate example fixtures against aeo-evidence-v1
+        run: |
+          python3 - <<'PY'
+          import glob, json, sys
+          from jsonschema import Draft202012Validator
+          schema = json.load(open('schemas/aeo-evidence-v1.json'))
+          validator = Draft202012Validator(schema)
+          fixtures = glob.glob('examples/*/aeo-data/*.json')
+          if not fixtures:
+              print('No example fixtures found — nothing to validate')
+              sys.exit(0)
+          had_errors = False
+          for path in fixtures:
+              instance = json.load(open(path))
+              errors = list(validator.iter_errors(instance))
+              if errors:
+                  had_errors = True
+                  print(f'✗ {path}')
+                  for e in errors:
+                      print(f'    {".".join(str(x) for x in e.absolute_path)}: {e.message}')
+              else:
+                  print(f'✓ {path}')
+          sys.exit(1 if had_errors else 0)
+          PY
+
+      - name: Verify visibility scores match component contributions
+        run: |
+          python3 - <<'PY'
+          import glob, json, sys
+          had_errors = False
+          for path in glob.glob('examples/*/aeo-data/*.json'):
+              data = json.load(open(path))
+              for prompt in data.get('prompts', []):
+                  vs = prompt.get('visibility_score')
+                  if not vs: continue
+                  expected = sum(c['contribution'] for c in vs['components'].values())
+                  actual = vs['value']
+                  if abs(expected - actual) > 0.01:
+                      had_errors = True
+                      print(f'✗ {path} prompt {prompt["prompt_id"]}: value={actual}, components sum to {expected}')
+                  else:
+                      print(f'✓ {path} prompt {prompt["prompt_id"]}: score={actual} matches components')
+          sys.exit(1 if had_errors else 0)
+          PY
+
   install-check:
     name: skills.sh install check
     runs-on: ubuntu-latest

@@ -79,7 +79,7 @@
           "text": {"type": "string", "minLength": 1},
           "intent": {
             "type": "string",
-            "enum": ["informational", "commercial", "navigational", "transactional", "comparison", "alternative", "research", "diagnostic", "other"]
+            "enum": ["informational", "commercial", "navigational", "transactional", "comparison", "alternative", "research", "diagnostic", "category_discovery", "vendor_comparison", "alternatives", "pricing", "integration", "trust", "problem_solution", "other"]
           },
           "tags": {
             "type": "array",

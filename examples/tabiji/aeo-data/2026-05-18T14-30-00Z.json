@@ -79,7 +79,7 @@
         }
       },
       "visibility_score": {
-        "value": 42.7,
+        "value": 50.85,
         "methodology_version": "aeo-v1",
         "components": {
           "mention_rate": {"value": 0.65, "weight": 0.30, "contribution": 19.5},
