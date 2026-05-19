@@ -63,15 +63,16 @@ jobs:
         run: |
           # Verify that npx skills can find every skill in this repo
           # (Catches frontmatter / folder name / SKILL.md issues)
-          npx -y skills@latest add ./. --list 2>&1 | tee /tmp/skills-list.txt
-          # Confirm we got at least 14 skills (current count is 15)
-          # Look for the "Found N skills" line emitted by the CLI
-          if ! grep -E "Found [0-9]+ skills" /tmp/skills-list.txt; then
-            echo "::error::skills.sh CLI did not discover any skills"
+          # NO_COLOR strips ANSI codes from the CLI's output so grep can read it
+          NO_COLOR=1 FORCE_COLOR=0 npx -y skills@latest add ./. --list 2>&1 \
+            | sed -r 's/\x1B\[[0-9;]*[mK]//g' \
+            | tee /tmp/skills-list.txt
+          # Extract the count from "Found N skills"
+          count=$(grep -oE "Found [0-9]+ skills" /tmp/skills-list.txt | grep -oE "[0-9]+" | head -1)
+          if [ -z "$count" ]; then
+            echo "::error::skills.sh CLI did not emit a 'Found N skills' line"
             exit 1
           fi
-          # Extract the count and verify it's >= 14
-          count=$(grep -oE "Found [0-9]+ skills" /tmp/skills-list.txt | grep -oE "[0-9]+" | head -1)
           if [ "$count" -lt 14 ]; then
             echo "::error::Expected at least 14 skills, found $count"
             exit 1
