@@ -1,0 +1,94 @@
+{
+  "schema_version": "aeo-evidence-v1",
+  "workspace": {
+    "brand": "Tabiji",
+    "domain": "tabiji.ai",
+    "aliases": ["tabiji", "tabiji.ai"],
+    "competitors": ["tripadvisor.com", "lonelyplanet.com"]
+  },
+  "run": {
+    "run_id": "run_2026-05-18T14-30-00Z",
+    "timestamp": "2026-05-18T14:30:00Z",
+    "provider": "gemini",
+    "model": "gemini-3-flash-preview",
+    "samples": 20,
+    "methodology_version": "aeo-v1",
+    "estimated_cost_usd": 0.043,
+    "actual_cost_usd": 0.041,
+    "latency_ms_p50": 6800
+  },
+  "prompts": [
+    {
+      "prompt_id": "best_travel_planning_tools",
+      "prompt_text": "What are the best travel planning tools?",
+      "intent": "commercial",
+      "successful_samples": 20,
+      "failed_samples": 0,
+      "samples": [
+        {
+          "sample_idx": 0,
+          "raw_response_text": "When planning a trip, several tools stand out. TripAdvisor is the most established platform for reviews and bookings. Lonely Planet offers in-depth destination guides. Tabiji is a newer entrant focused on AI-powered itinerary generation.",
+          "raw_provider_payload_path": "aeo-data/raw/run_2026-05-18T14-30-00Z/prompt_0/sample_0.json",
+          "queries_fired": ["best travel planning tools 2026", "AI travel itinerary planner"],
+          "citations": [
+            {"url": "https://tripadvisor.com/best-tools", "position": 1, "domain": "tripadvisor.com", "title": "Best Travel Planning Tools 2026"},
+            {"url": "https://lonelyplanet.com/planning", "position": 2, "domain": "lonelyplanet.com", "title": "Trip Planning Resources"},
+            {"url": "https://tabiji.ai/", "position": 4, "domain": "tabiji.ai", "title": "Tabiji — AI Travel Planning"}
+          ],
+          "brand_mentions": [
+            {"text": "Tabiji", "context": "Tabiji is a newer entrant focused on AI-powered itinerary generation.", "position_in_text": 178, "sentiment": "neutral"}
+          ],
+          "competitor_mentions": [
+            {"name": "TripAdvisor", "domain": "tripadvisor.com", "context": "TripAdvisor is the most established platform for reviews and bookings.", "sentiment": "positive"},
+            {"name": "Lonely Planet", "domain": "lonelyplanet.com", "context": "Lonely Planet offers in-depth destination guides.", "sentiment": "positive"}
+          ],
+          "entities": ["TripAdvisor", "Lonely Planet", "Tabiji"],
+          "latency_ms": 6420
+        }
+      ],
+      "aggregates": {
+        "mention_rate": 0.65,
+        "mention_rate_ci": [0.41, 0.85],
+        "citation_rate": 0.45,
+        "citation_rate_ci": [0.23, 0.69],
+        "avg_citation_position": 3.2,
+        "first_mention_position_avg": 178.5,
+        "query_fanout": {
+          "best travel planning tools 2026": 0.85,
+          "AI travel itinerary planner": 0.60,
+          "top travel apps": 0.55
+        },
+        "entity_universe": {
+          "TripAdvisor": 18,
+          "Tabiji": 13,
+          "Lonely Planet": 9,
+          "Google Maps": 7,
+          "Wanderlog": 5
+        },
+        "competitor_share": {
+          "tripadvisor.com": 0.80,
+          "lonelyplanet.com": 0.55,
+          "tabiji.ai": 0.45
+        },
+        "sentiment_distribution": {
+          "positive": 6,
+          "neutral": 13,
+          "negative": 1,
+          "mixed": 0,
+          "unknown": 0
+        }
+      },
+      "visibility_score": {
+        "value": 50.85,
+        "methodology_version": "aeo-v1",
+        "components": {
+          "mention_rate": {"value": 0.65, "weight": 0.30, "contribution": 19.5},
+          "citation_rate": {"value": 0.45, "weight": 0.25, "contribution": 11.25},
+          "position_score": {"value": 0.68, "weight": 0.20, "contribution": 13.6},
+          "recommendation_rate": {"value": 0.10, "weight": 0.15, "contribution": 1.5},
+          "sentiment_score": {"value": 0.50, "weight": 0.10, "contribution": 5.0}
+        }
+      }
+    }
+  ]
+}

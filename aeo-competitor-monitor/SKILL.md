@@ -38,15 +38,13 @@ AI Overviews create a new competitive landscape. Influence happens at retrieval,
 
 ```bash
 # Scan two prompts, tracking three competitors
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/monitor.py scan \
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/monitor.py scan \
     --prompts "best SEO tools" "content optimization software" \
     --competitors acme.com surferseo.com semrush.com \
     --data-file monitor-data.json
 
 # With custom run count
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/monitor.py scan \
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/monitor.py scan \
     --prompts "best SEO tools" \
     --competitors acme.com surferseo.com \
     --data-file monitor-data.json \

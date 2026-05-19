@@ -19,8 +19,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse
 
 # ── Shared imports ──────────────────────────────────────────────────────────
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
-from shared.gemini_client import (
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _shared import (
     call_gemini, extract_sources, extract_domain, domain_matches, get_api_key,
     DEFAULT_MODEL, DEFAULT_RUNS, DEFAULT_CONCURRENCY,
 )

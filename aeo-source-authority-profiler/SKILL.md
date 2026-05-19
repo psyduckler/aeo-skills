@@ -48,20 +48,16 @@ The result is a **citation blueprint** — a concrete spec for what your content
 
 ```bash
 # Basic — profile top-cited sources for a prompt
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/profile.py "best project management tools for startups"
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/profile.py "best project management tools for startups"
 
 # Highlight how your domain compares to the blueprint
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/profile.py "best project management tools for startups" --domain monday.com
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/profile.py "best project management tools for startups" --domain monday.com
 
 # Profile more pages with higher confidence
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/profile.py "best CRM software" --domain hubspot.com --runs 30 --top 15
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/profile.py "best CRM software" --domain hubspot.com --runs 30 --top 15
 
 # JSON output for programmatic use
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/profile.py "best SEO tools" --output json
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/profile.py "best SEO tools" --output json
 ```
 
 Run from the skill directory. Resolve `scripts/profile.py` relative to this SKILL.md.

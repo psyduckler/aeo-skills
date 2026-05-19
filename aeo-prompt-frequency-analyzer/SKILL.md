@@ -14,8 +14,7 @@ Run a prompt N times against Gemini with Google Search grounding enabled. Collec
 ## Usage
 
 ```bash
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/analyze.py "your prompt here" [--runs 20] [--model gemini-3-flash-preview] [--concurrency 5] [--output text|json]
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/analyze.py "your prompt here" [--runs 20] [--model gemini-3-flash-preview] [--concurrency 5] [--output text|json]
 ```
 
 Run from the skill directory. Resolve `scripts/analyze.py` relative to this SKILL.md.

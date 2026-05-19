@@ -17,8 +17,8 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # ── Shared imports ──────────────────────────────────────────────────────────
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
-from shared.gemini_client import (
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _shared import (
     call_gemini, extract_queries, extract_sources, classify_intent, get_api_key,
     DEFAULT_MODEL, DEFAULT_RUNS, DEFAULT_CONCURRENCY,
 )

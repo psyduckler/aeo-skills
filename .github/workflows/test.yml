@@ -1,0 +1,125 @@
+name: tests
+
+on:
+  push:
+    branches: [main, v2-foundation, "v2-**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke-tests:
+    name: Smoke tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run smoke tests
+        run: python3 tests/test_compile.py
+
+  schema-validation:
+    name: Schema validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install jsonschema
+        run: python3 -m pip install --quiet jsonschema
+
+      - name: Validate every schema is valid JSON Schema
+        run: |
+          for schema in schemas/*.json; do
+            echo "Validating $schema"
+            python3 -c "
+          import json, sys
+          from jsonschema import Draft202012Validator
+          schema = json.load(open('$schema'))
+          Draft202012Validator.check_schema(schema)
+          print('  ok')
+          "
+          done
+
+      - name: Validate example fixtures against aeo-evidence-v1
+        run: |
+          python3 - <<'PY'
+          import glob, json, sys
+          from jsonschema import Draft202012Validator
+          schema = json.load(open('schemas/aeo-evidence-v1.json'))
+          validator = Draft202012Validator(schema)
+          fixtures = glob.glob('examples/*/aeo-data/*.json')
+          if not fixtures:
+              print('No example fixtures found — nothing to validate')
+              sys.exit(0)
+          had_errors = False
+          for path in fixtures:
+              instance = json.load(open(path))
+              errors = list(validator.iter_errors(instance))
+              if errors:
+                  had_errors = True
+                  print(f'✗ {path}')
+                  for e in errors:
+                      print(f'    {".".join(str(x) for x in e.absolute_path)}: {e.message}')
+              else:
+                  print(f'✓ {path}')
+          sys.exit(1 if had_errors else 0)
+          PY
+
+      - name: Verify visibility scores match component contributions
+        run: |
+          python3 - <<'PY'
+          import glob, json, sys
+          had_errors = False
+          for path in glob.glob('examples/*/aeo-data/*.json'):
+              data = json.load(open(path))
+              for prompt in data.get('prompts', []):
+                  vs = prompt.get('visibility_score')
+                  if not vs: continue
+                  expected = sum(c['contribution'] for c in vs['components'].values())
+                  actual = vs['value']
+                  if abs(expected - actual) > 0.01:
+                      had_errors = True
+                      print(f'✗ {path} prompt {prompt["prompt_id"]}: value={actual}, components sum to {expected}')
+                  else:
+                      print(f'✓ {path} prompt {prompt["prompt_id"]}: score={actual} matches components')
+          sys.exit(1 if had_errors else 0)
+          PY
+
+  install-check:
+    name: skills.sh install check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: List discoverable skills via npx skills
+        run: |
+          # Verify that npx skills can find every skill in this repo
+          # (Catches frontmatter / folder name / SKILL.md issues)
+          # NO_COLOR strips ANSI codes from the CLI's output so grep can read it
+          NO_COLOR=1 FORCE_COLOR=0 npx -y skills@latest add ./. --list 2>&1 \
+            | sed -r 's/\x1B\[[0-9;]*[mK]//g' \
+            | tee /tmp/skills-list.txt
+          # Extract the count from "Found N skills"
+          count=$(grep -oE "Found [0-9]+ skills" /tmp/skills-list.txt | grep -oE "[0-9]+" | head -1)
+          if [ -z "$count" ]; then
+            echo "::error::skills.sh CLI did not emit a 'Found N skills' line"
+            exit 1
+          fi
+          if [ "$count" -lt 14 ]; then
+            echo "::error::Expected at least 14 skills, found $count"
+            exit 1
+          fi
+          echo "Discovered $count skills"

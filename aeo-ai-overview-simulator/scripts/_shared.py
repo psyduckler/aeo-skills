@@ -10,8 +10,8 @@ Provides common functions used across all AEO skill scripts:
 
 Import from any script:
     import sys, os
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
-    from shared.gemini_client import call_gemini, extract_sources, ...
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from _shared import call_gemini, extract_sources, ...
 """
 
 import json

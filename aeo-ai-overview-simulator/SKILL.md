@@ -34,24 +34,19 @@ Running 20 samples per prompt captures the probabilistic nature of AI responses.
 
 ```bash
 # Basic — simulate an AI Overview for a query
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/simulate.py "best project management tools for startups"
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/simulate.py "best project management tools for startups"
 
 # Track a specific domain
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/simulate.py "best project management tools for startups" --domain monday.com
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/simulate.py "best project management tools for startups" --domain monday.com
 
 # With response text diffing — see stable core vs volatile insertion points
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/simulate.py "best project management tools for startups" --domain monday.com --diff
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/simulate.py "best project management tools for startups" --domain monday.com --diff
 
 # More runs for higher confidence
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/simulate.py "best project management tools for startups" --domain monday.com --runs 40
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/simulate.py "best project management tools for startups" --domain monday.com --runs 40
 
 # JSON output for programmatic use
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/simulate.py "best project management tools for startups" --output json
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/simulate.py "best project management tools for startups" --output json
 ```
 
 Run from the skill directory. Resolve `scripts/simulate.py` relative to this SKILL.md.

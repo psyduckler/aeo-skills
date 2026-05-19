@@ -1,0 +1,341 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/psyduckler/aeo-skills/schemas/aeo-evidence-v1.json",
+  "title": "AEO Evidence v1",
+  "description": "Public, versioned output format for AEO visibility measurements. Every metric in this format is reproducible from the raw sample data — same input, same number. Produced by aeo-baseline (and v1 measurement skills); consumed by aeo-report and aeo-optimize.",
+  "type": "object",
+  "required": ["schema_version", "workspace", "run", "prompts"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "aeo-evidence-v1"
+    },
+    "workspace": {
+      "type": "object",
+      "required": ["brand", "domain"],
+      "properties": {
+        "brand": {
+          "type": "string",
+          "description": "The brand/company name to track for mentions",
+          "minLength": 1
+        },
+        "domain": {
+          "type": "string",
+          "description": "The brand's primary domain (without protocol)",
+          "minLength": 1
+        },
+        "aliases": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Alternate names/spellings that should also count as a mention"
+        },
+        "competitors": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Competitor domains to track for share-of-voice analysis"
+        }
+      },
+      "additionalProperties": false
+    },
+    "run": {
+      "type": "object",
+      "required": ["run_id", "timestamp", "provider", "model", "samples", "methodology_version"],
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "description": "Unique identifier for this measurement run",
+          "pattern": "^run_[0-9TZ:.-]+$"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when the run started"
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["gemini", "openai", "anthropic", "perplexity"],
+          "description": "Which AI provider was queried"
+        },
+        "model": {
+          "type": "string",
+          "description": "Specific model identifier",
+          "minLength": 1
+        },
+        "samples": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of samples run per prompt"
+        },
+        "methodology_version": {
+          "type": "string",
+          "description": "Version tag for the scoring/extraction methodology (e.g. 'aeo-v1')",
+          "pattern": "^aeo-v[0-9]+(\\.[0-9]+)?$"
+        },
+        "estimated_cost_usd": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Pre-run cost estimate, in USD"
+        },
+        "actual_cost_usd": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Actual measured cost, in USD"
+        },
+        "latency_ms_p50": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Median per-sample latency in milliseconds"
+        }
+      },
+      "additionalProperties": false
+    },
+    "prompts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/promptResult"}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "promptResult": {
+      "type": "object",
+      "required": ["prompt_id", "prompt_text", "successful_samples", "samples", "aggregates"],
+      "properties": {
+        "prompt_id": {
+          "type": "string",
+          "description": "Stable identifier for the prompt (snake_case slug)",
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "prompt_text": {
+          "type": "string",
+          "description": "The literal prompt sent to the provider",
+          "minLength": 1
+        },
+        "intent": {
+          "type": "string",
+          "enum": ["informational", "commercial", "navigational", "transactional", "comparison", "alternative", "research", "diagnostic", "category_discovery", "vendor_comparison", "alternatives", "pricing", "integration", "trust", "problem_solution", "other"],
+          "description": "Classification of the prompt's intent"
+        },
+        "successful_samples": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of samples that returned a valid response"
+        },
+        "failed_samples": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of samples that errored or timed out"
+        },
+        "samples": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/sample"}
+        },
+        "aggregates": {"$ref": "#/$defs/aggregates"},
+        "visibility_score": {"$ref": "#/$defs/visibilityScore"}
+      },
+      "additionalProperties": false
+    },
+    "sample": {
+      "type": "object",
+      "required": ["sample_idx"],
+      "properties": {
+        "sample_idx": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "0-based index of this sample within the prompt run"
+        },
+        "raw_response_text": {
+          "type": "string",
+          "description": "The plain-text answer the provider returned"
+        },
+        "raw_provider_payload_path": {
+          "type": "string",
+          "description": "Relative path to the raw JSON payload on disk (for audit trail)"
+        },
+        "queries_fired": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Web search queries the model issued (when grounding is enabled)"
+        },
+        "citations": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/citation"}
+        },
+        "brand_mentions": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/mention"}
+        },
+        "competitor_mentions": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/competitorMention"}
+        },
+        "entities": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Named entities extracted from the response (brands, products, people, tools)"
+        },
+        "latency_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error": {
+          "type": "string",
+          "description": "Error message if this sample failed"
+        }
+      },
+      "additionalProperties": false
+    },
+    "citation": {
+      "type": "object",
+      "required": ["url", "position", "domain"],
+      "properties": {
+        "url": {"type": "string", "format": "uri"},
+        "position": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-based position in the grounding chunks array"
+        },
+        "domain": {"type": "string"},
+        "title": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "mention": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The exact mention as it appeared in the response"
+        },
+        "context": {
+          "type": "string",
+          "description": "Surrounding sentence(s) for context"
+        },
+        "position_in_text": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Character offset of the mention in raw_response_text"
+        },
+        "sentiment": {
+          "type": "string",
+          "enum": ["positive", "neutral", "negative", "mixed", "unknown"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "competitorMention": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {"type": "string"},
+        "domain": {"type": "string"},
+        "context": {"type": "string"},
+        "sentiment": {
+          "type": "string",
+          "enum": ["positive", "neutral", "negative", "mixed", "unknown"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "aggregates": {
+      "type": "object",
+      "description": "Computed metrics rolled up across all samples for this prompt",
+      "properties": {
+        "mention_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of samples where the brand was mentioned"
+        },
+        "mention_rate_ci": {
+          "type": "array",
+          "items": {"type": "number", "minimum": 0, "maximum": 1},
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[lower, upper] Wilson 95% CI for mention_rate"
+        },
+        "citation_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of samples where the brand's domain was cited"
+        },
+        "citation_rate_ci": {
+          "type": "array",
+          "items": {"type": "number", "minimum": 0, "maximum": 1},
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "avg_citation_position": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Mean 1-based position when the brand was cited (lower = more prominent)"
+        },
+        "first_mention_position_avg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Mean character offset of the brand's first mention across samples"
+        },
+        "query_fanout": {
+          "type": "object",
+          "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1},
+          "description": "Map of {query: frequency} — fraction of samples that fired each query"
+        },
+        "entity_universe": {
+          "type": "object",
+          "additionalProperties": {"type": "integer", "minimum": 0},
+          "description": "Map of {entity_name: total_mention_count} across all samples"
+        },
+        "competitor_share": {
+          "type": "object",
+          "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1},
+          "description": "Map of {competitor_domain: citation_rate} across all samples"
+        },
+        "sentiment_distribution": {
+          "type": "object",
+          "properties": {
+            "positive": {"type": "integer", "minimum": 0},
+            "neutral": {"type": "integer", "minimum": 0},
+            "negative": {"type": "integer", "minimum": 0},
+            "mixed": {"type": "integer", "minimum": 0},
+            "unknown": {"type": "integer", "minimum": 0}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "visibilityScore": {
+      "type": "object",
+      "required": ["value", "methodology_version", "components"],
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Composite visibility score, 0-100"
+        },
+        "methodology_version": {
+          "type": "string",
+          "pattern": "^aeo-v[0-9]+(\\.[0-9]+)?$"
+        },
+        "components": {
+          "type": "object",
+          "description": "Per-signal breakdown: each component contributes weight × value to the total",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["value", "weight", "contribution"],
+            "properties": {
+              "value": {"type": "number", "minimum": 0, "maximum": 1},
+              "weight": {"type": "number", "minimum": 0, "maximum": 1},
+              "contribution": {"type": "number", "minimum": 0, "maximum": 100}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

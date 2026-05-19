@@ -43,27 +43,23 @@ The strategic question this skill answers: should you build one comprehensive hu
 
 ```bash
 # Basic — analyze 3 related prompts
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/strategize.py \
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/strategize.py \
     "best content optimization tools" \
     "how to optimize content for SEO" \
     "content optimization software comparison"
 
 # With domain analysis
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/strategize.py \
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/strategize.py \
     "best content optimization tools" \
     "how to optimize content for SEO" \
     "content optimization software comparison" \
     --domain acme.com
 
 # Load prompts from file
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/strategize.py --prompts-file my-prompts.txt --domain acme.com
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/strategize.py --prompts-file my-prompts.txt --domain acme.com
 
 # JSON output
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/strategize.py \
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/strategize.py \
     "best CRM for startups" "CRM software comparison" "what CRM should I use" \
     --output json
 ```
