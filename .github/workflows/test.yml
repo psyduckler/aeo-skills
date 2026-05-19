@@ -21,6 +21,22 @@ jobs:
       - name: Run smoke tests
         run: python3 tests/test_compile.py
 
+      - name: Run per-skill extraction tests
+        run: |
+          # Find every test_*.py inside any */tests/ subdirectory and run via unittest.
+          # Each skill's tests/ is self-contained (manages its own sys.path).
+          fail=0
+          while IFS= read -r tf; do
+            tf="${tf#./}"
+            echo ""
+            echo "── Running $tf"
+            python3 -m unittest "$tf" -v || fail=1
+          done < <(find . -path './*/tests/test_*.py' -not -path './tests/*' -not -path './node_modules/*')
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::Per-skill tests failed"
+            exit 1
+          fi
+
   schema-validation:
     name: Schema validation
     runs-on: ubuntu-latest
