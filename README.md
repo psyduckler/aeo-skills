@@ -113,6 +113,8 @@ The streamlined v2 measurement core. Built against [`schemas/aeo-evidence-v1.jso
 | **aeo-baseline** | Atomic AI visibility measurement. Runs each configured prompt 20× against Gemini with grounding, extracts every signal (mentions, citations, position, query fan-out, entities, sentiment, competitors) from the same 20 responses, computes Wilson 95% CIs, and writes one append-only JSON evidence file. Built-in `--doctor` and `--estimate-cost` modes; honors spend caps. | [→ Skill](./aeo-baseline/) |
 | **aeo-track** | Schedule recurring `aeo-baseline` runs. Generates a launchd plist (macOS) or crontab entry (Linux) plus a wrapper script that loads `.env` and invokes baseline. Dry-run by default; `--apply` installs. Idempotent install/remove with per-workspace state. | [→ Skill](./aeo-track/) |
 | **aeo-report** | Read accumulated `aeo-data/*.json` and produce a visibility trend report: Markdown + single-file HTML with embedded SVG line charts. Surfaces decay (declining citation rate), cannibalization (multiple owned URLs competing), hub-page opportunities (one URL across many prompts), and competitor share shifts. Pure analysis — no API calls. | [→ Skill](./aeo-report/) |
+| **aeo-optimize** | Turn a baseline into a concrete content work queue. Reads the latest evidence + (optionally) the report and produces prioritized Markdown tasks, each backed by specific prompts and metrics: refresh URL X, create comparison page A vs B, add JSON-LD type Z. SKILL.md-only — agent reasons over the methodology, no script. | [→ Skill](./aeo-optimize/) |
+| **aeo-schema** | Generate JSON-LD structured data optimized for AI citation. Templates for Article, FAQ, HowTo, Product, LocalBusiness, BreadcrumbList. SKILL.md-only. Renamed from v1 `aeo-schema-optimizer`. | [→ Skill](./aeo-schema/) |
 
 ### Core Pipeline (v1)
 
@@ -150,7 +152,7 @@ Improve your content's AI-readiness.
 
 | Skill | Description | Link |
 |-------|-------------|------|
-| **aeo-schema-optimizer** | Analyze pages and generate structured data (JSON-LD) optimized for AI citation. Includes templates for Article, FAQ, HowTo, Product, LocalBusiness, and BreadcrumbList. | [→ Skill](./aeo-schema-optimizer/) |
+| **aeo-schema** | Analyze pages and generate structured data (JSON-LD) optimized for AI citation. Includes templates for Article, FAQ, HowTo, Product, LocalBusiness, and BreadcrumbList. *(v2 Core — renamed from `aeo-schema-optimizer`.)* | [→ Skill](./aeo-schema/) |
 
 ### Advanced Strategy
 
@@ -178,7 +180,7 @@ These skills form a complete AEO workflow:
 
 1. **Research** (`aeo-prompt-research-free`) — Find what questions people ask AI about your industry
 2. **Analyze** (`aeo-prompt-frequency-analyzer`, `aeo-grounding-query-mapper`, `aeo-prompt-question-finder`) — Understand how AI models search and what they cite
-3. **Create** (`aeo-content-free`, `aeo-schema-optimizer`) — Write content and add structured data optimized for AI citations
+3. **Create** (`aeo-content-free`, `aeo-schema`) — Write content and add structured data optimized for AI citations
 4. **Simulate** (`aeo-ai-overview-simulator`, `aeo-citation-gap-finder`) — Preview how your content performs in AI Overviews
 5. **Measure** (`aeo-analytics-free`, `aeo-competitor-monitor`, `aeo-freshness-decay-tracker`) — Track your visibility, competitors, content decay over time
 6. **Profile** (`aeo-source-authority-profiler`, `aeo-entity-extractor`) — Understand WHY top sources get cited

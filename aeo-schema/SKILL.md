@@ -1,5 +1,5 @@
 ---
-name: aeo-schema-optimizer
+name: aeo-schema
 description: >
   Analyze web pages and generate structured data (JSON-LD) optimized for AI citation.
   Fetches a page, analyzes its content structure, checks existing schema markup, and
@@ -7,13 +7,15 @@ description: >
   and cite the content. Includes templates for Article, FAQ, HowTo, Product, LocalBusiness,
   and BreadcrumbList. SKILL.md-only skill — no script, the agent follows the methodology.
   Use when a user wants to: add or improve structured data on a page, optimize schema
-  for AI Overviews, generate JSON-LD for their content, or audit existing schema markup.
+  for AI Overviews, generate JSON-LD for their content, audit existing schema markup,
+  or implement an aeo-optimize recommendation that calls for new structured data.
 ---
 
-# AEO Schema Optimizer
+# AEO Schema
 
-> **Source:** [github.com/psyduckler/aeo-skills](https://github.com/psyduckler/aeo-skills/tree/main/aeo-schema-optimizer)
-> **Part of:** [AEO Skills Suite](https://github.com/psyduckler/aeo-skills)
+> **Source:** [github.com/psyduckler/aeo-skills](https://github.com/psyduckler/aeo-skills/tree/main/aeo-schema)
+> **Part of:** [AEO Skills Suite](https://github.com/psyduckler/aeo-skills) (v2 Core)
+> **Previously:** `aeo-schema-optimizer` — renamed in v2 for namespace consistency
 
 Generate structured data (JSON-LD) optimized for AI citation. Help Gemini 3 Flash and other AI models find, understand, and cite your content.
 
