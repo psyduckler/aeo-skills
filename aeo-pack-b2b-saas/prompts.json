@@ -1,0 +1,188 @@
+{
+  "schema_version": "prompt-pack-v1",
+  "pack": {
+    "name": "b2b-saas",
+    "version": "1.0.0",
+    "description": "Standard prompt set for B2B SaaS visibility tracking. Covers category discovery, vendor comparison, pricing, integrations, and alternatives.",
+    "author": "psyduckler",
+    "license": "MIT",
+    "homepage": "https://github.com/psyduckler/aeo-skills/tree/main/aeo-pack-b2b-saas"
+  },
+  "intents": [
+    "category_discovery",
+    "vendor_comparison",
+    "alternatives",
+    "pricing",
+    "integration",
+    "trust"
+  ],
+  "variables": {
+    "category": {
+      "description": "Your software category, e.g. 'project management', 'CRM', 'analytics', 'content optimization'",
+      "example": "project management",
+      "required": true
+    },
+    "problem": {
+      "description": "The user-facing problem your category solves",
+      "example": "tracking customer support tickets",
+      "required": true
+    },
+    "vendor": {
+      "description": "Your brand or a key competitor's brand",
+      "example": "Linear",
+      "required": false
+    },
+    "integration": {
+      "description": "A common integration target (Slack, Salesforce, etc.)",
+      "example": "Slack",
+      "required": false
+    },
+    "company_size": {
+      "description": "startup / SMB / mid-market / enterprise",
+      "example": "startup",
+      "required": false
+    }
+  },
+  "prompts": [
+    {
+      "prompt_id": "best_tools_for_problem",
+      "text": "What are the best tools for {{problem}}?",
+      "intent": "category_discovery",
+      "variables": ["problem"],
+      "tags": ["category", "discovery"]
+    },
+    {
+      "prompt_id": "top_category_in_2026",
+      "text": "Top {{category}} software in 2026",
+      "intent": "category_discovery",
+      "variables": ["category"],
+      "tags": ["category", "discovery"]
+    },
+    {
+      "prompt_id": "best_category_for_startups",
+      "text": "Best {{category}} for {{company_size}}",
+      "intent": "category_discovery",
+      "variables": ["category", "company_size"],
+      "tags": ["category", "segment"]
+    },
+    {
+      "prompt_id": "vendor_vs_alternatives",
+      "text": "{{vendor}} vs alternatives: which is best?",
+      "intent": "vendor_comparison",
+      "variables": ["vendor"],
+      "tags": ["comparison"]
+    },
+    {
+      "prompt_id": "vendor_alternatives",
+      "text": "Alternatives to {{vendor}}",
+      "intent": "alternatives",
+      "variables": ["vendor"],
+      "tags": ["alternatives"]
+    },
+    {
+      "prompt_id": "vendor_pros_cons",
+      "text": "Pros and cons of {{vendor}}",
+      "intent": "research",
+      "variables": ["vendor"],
+      "tags": ["evaluation"]
+    },
+    {
+      "prompt_id": "is_vendor_worth_it",
+      "text": "Is {{vendor}} worth it for {{company_size}}?",
+      "intent": "research",
+      "variables": ["vendor", "company_size"],
+      "tags": ["evaluation"]
+    },
+    {
+      "prompt_id": "category_pricing_comparison",
+      "text": "Pricing comparison: affordable {{category}}",
+      "intent": "pricing",
+      "variables": ["category"],
+      "tags": ["pricing"]
+    },
+    {
+      "prompt_id": "vendor_pricing",
+      "text": "How much does {{vendor}} cost?",
+      "intent": "pricing",
+      "variables": ["vendor"],
+      "tags": ["pricing"]
+    },
+    {
+      "prompt_id": "free_alternatives_to_vendor",
+      "text": "Free alternatives to {{vendor}}",
+      "intent": "alternatives",
+      "variables": ["vendor"],
+      "tags": ["pricing", "alternatives"]
+    },
+    {
+      "prompt_id": "category_integration",
+      "text": "Best {{category}} that integrates with {{integration}}",
+      "intent": "integration",
+      "variables": ["category", "integration"],
+      "tags": ["integration"]
+    },
+    {
+      "prompt_id": "vendor_integrations",
+      "text": "What does {{vendor}} integrate with?",
+      "intent": "integration",
+      "variables": ["vendor"],
+      "tags": ["integration"]
+    },
+    {
+      "prompt_id": "category_for_remote_teams",
+      "text": "Best {{category}} for remote teams",
+      "intent": "category_discovery",
+      "variables": ["category"],
+      "tags": ["segment"]
+    },
+    {
+      "prompt_id": "enterprise_category",
+      "text": "Enterprise-grade {{category}} platforms",
+      "intent": "category_discovery",
+      "variables": ["category"],
+      "tags": ["enterprise"]
+    },
+    {
+      "prompt_id": "vendor_security",
+      "text": "Is {{vendor}} secure? SOC 2 / GDPR / HIPAA compliance",
+      "intent": "trust",
+      "variables": ["vendor"],
+      "tags": ["security", "trust"]
+    },
+    {
+      "prompt_id": "category_open_source",
+      "text": "Open-source {{category}} alternatives",
+      "intent": "alternatives",
+      "variables": ["category"],
+      "tags": ["open-source", "alternatives"]
+    },
+    {
+      "prompt_id": "category_api_first",
+      "text": "API-first {{category}} for developers",
+      "intent": "category_discovery",
+      "variables": ["category"],
+      "tags": ["developer", "api"]
+    },
+    {
+      "prompt_id": "category_self_hosted",
+      "text": "Self-hosted {{category}} options",
+      "intent": "alternatives",
+      "variables": ["category"],
+      "tags": ["self-hosted"]
+    },
+    {
+      "prompt_id": "vendor_setup_difficulty",
+      "text": "How long does it take to set up {{vendor}}?",
+      "intent": "research",
+      "variables": ["vendor"],
+      "tags": ["onboarding"]
+    },
+    {
+      "prompt_id": "category_with_ai",
+      "text": "Best AI-powered {{category}}",
+      "intent": "category_discovery",
+      "variables": ["category"],
+      "tags": ["ai"]
+    }
+  ]
+}

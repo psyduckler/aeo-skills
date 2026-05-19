@@ -1,0 +1,154 @@
+{
+  "schema_version": "prompt-pack-v1",
+  "pack": {
+    "name": "local-services",
+    "version": "1.0.0",
+    "description": "Prompt set for local service businesses (plumbers, dentists, lawyers, restaurants, contractors). Covers near-me searches, ratings, pricing, emergencies, and specialty.",
+    "author": "psyduckler",
+    "license": "MIT",
+    "homepage": "https://github.com/psyduckler/aeo-skills/tree/main/aeo-pack-local-services"
+  },
+  "intents": [
+    "category_discovery",
+    "navigational",
+    "transactional",
+    "research",
+    "trust"
+  ],
+  "variables": {
+    "service": {
+      "description": "The service offered (plumber, dentist, lawyer, mechanic, etc.)",
+      "example": "plumber",
+      "required": true
+    },
+    "city": {
+      "description": "Target city / metro area",
+      "example": "Austin",
+      "required": true
+    },
+    "specialty": {
+      "description": "Specific subtype, if applicable (emergency, family, criminal, etc.)",
+      "example": "emergency",
+      "required": false
+    },
+    "neighborhood": {
+      "description": "Sub-area of the city, if relevant",
+      "example": "South Congress",
+      "required": false
+    }
+  },
+  "prompts": [
+    {
+      "prompt_id": "best_service_in_city",
+      "text": "Best {{service}} in {{city}}",
+      "intent": "category_discovery",
+      "variables": ["service", "city"],
+      "tags": ["local", "discovery"]
+    },
+    {
+      "prompt_id": "top_rated_service_city",
+      "text": "Top-rated {{service}} in {{city}}",
+      "intent": "category_discovery",
+      "variables": ["service", "city"],
+      "tags": ["local", "discovery", "rating"]
+    },
+    {
+      "prompt_id": "service_near_me_city",
+      "text": "{{service}} near me {{city}}",
+      "intent": "navigational",
+      "variables": ["service", "city"],
+      "tags": ["local", "proximity"]
+    },
+    {
+      "prompt_id": "specialty_service_city",
+      "text": "{{specialty}} {{service}} in {{city}}",
+      "intent": "category_discovery",
+      "variables": ["specialty", "service", "city"],
+      "tags": ["local", "specialty"]
+    },
+    {
+      "prompt_id": "emergency_service_city",
+      "text": "Emergency {{service}} {{city}}",
+      "intent": "transactional",
+      "variables": ["service", "city"],
+      "tags": ["urgent"]
+    },
+    {
+      "prompt_id": "affordable_service_city",
+      "text": "Affordable {{service}} {{city}}",
+      "intent": "category_discovery",
+      "variables": ["service", "city"],
+      "tags": ["pricing"]
+    },
+    {
+      "prompt_id": "service_cost_city",
+      "text": "How much does a {{service}} cost in {{city}}?",
+      "intent": "research",
+      "variables": ["service", "city"],
+      "tags": ["pricing"]
+    },
+    {
+      "prompt_id": "service_open_now_city",
+      "text": "{{service}} open now {{city}}",
+      "intent": "navigational",
+      "variables": ["service", "city"],
+      "tags": ["proximity", "urgency"]
+    },
+    {
+      "prompt_id": "service_neighborhood",
+      "text": "{{service}} in {{neighborhood}}, {{city}}",
+      "intent": "navigational",
+      "variables": ["service", "neighborhood", "city"],
+      "tags": ["proximity", "neighborhood"]
+    },
+    {
+      "prompt_id": "service_reviews_city",
+      "text": "{{service}} reviews {{city}}",
+      "intent": "research",
+      "variables": ["service", "city"],
+      "tags": ["reviews"]
+    },
+    {
+      "prompt_id": "service_recommendations_city",
+      "text": "Recommendations for {{service}} in {{city}}",
+      "intent": "category_discovery",
+      "variables": ["service", "city"],
+      "tags": ["recommendation"]
+    },
+    {
+      "prompt_id": "how_to_choose_service",
+      "text": "How to choose a {{service}} in {{city}}",
+      "intent": "research",
+      "variables": ["service", "city"],
+      "tags": ["evaluation"]
+    },
+    {
+      "prompt_id": "trustworthy_service_city",
+      "text": "Trustworthy {{service}} in {{city}}",
+      "intent": "trust",
+      "variables": ["service", "city"],
+      "tags": ["trust"]
+    },
+    {
+      "prompt_id": "licensed_service_city",
+      "text": "Licensed {{service}} {{city}}",
+      "intent": "trust",
+      "variables": ["service", "city"],
+      "tags": ["license", "trust"]
+    },
+    {
+      "prompt_id": "service_questions_to_ask",
+      "text": "Questions to ask a {{service}} before hiring",
+      "intent": "research",
+      "variables": ["service"],
+      "tags": ["evaluation"]
+    },
+    {
+      "prompt_id": "service_what_to_expect",
+      "text": "What to expect from a {{service}} visit",
+      "intent": "research",
+      "variables": ["service"],
+      "tags": ["education"]
+    }
+  ]
+}
