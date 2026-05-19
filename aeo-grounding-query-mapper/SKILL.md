@@ -44,20 +44,16 @@ This is an upgraded version of `prompt-frequency-analyzer` with three key additi
 
 ```bash
 # Single prompt
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/map_queries.py "best CRM for small business"
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/map_queries.py "best CRM for small business"
 
 # Multiple prompts
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/map_queries.py "best CRM for small business" "CRM vs spreadsheet" "how to choose a CRM"
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/map_queries.py "best CRM for small business" "CRM vs spreadsheet" "how to choose a CRM"
 
 # Batch mode from file (one prompt per line)
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/map_queries.py --prompts-file prompts.txt
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/map_queries.py --prompts-file prompts.txt
 
 # JSON output
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/map_queries.py "best CRM for small business" --output json
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/map_queries.py "best CRM for small business" --output json
 ```
 
 Run from the skill directory. Resolve `scripts/map_queries.py` relative to this SKILL.md.

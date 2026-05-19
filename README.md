@@ -1,10 +1,48 @@
 # AEO Skills — Answer Engine Optimization for AI Agents
 
-A suite of open-source skills that help AI agents optimize content for **Answer Engines** (ChatGPT, Gemini, Perplexity, etc.). Built for [OpenClaw](https://openclaw.ai) agents but designed to be adaptable to any agent framework.
+[![skills.sh](https://skills.sh/b/psyduckler/aeo-skills)](https://skills.sh/psyduckler/aeo-skills)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Default model:** All skills that call the Gemini API default to **`gemini-3-flash-preview`** — the model powering Google Search AI Mode and AI Overviews. Using the same model Google uses means your measurements reflect real-world AI Overview behavior.
+Open-source agent skills that measure, track, and improve a brand's visibility in AI answer engines (Gemini AI Overviews, ChatGPT, Perplexity). **BYOK** (bring your own Gemini key), **evidence-first** (every metric traces back to a raw response), **no vendor lock-in** (data lives in your project as JSON).
 
-**Default sample count:** 20 runs per prompt. AI responses are probabilistic; a single run can miss mentions that appear 30-40% of the time. 20 samples balances accuracy with API cost.
+## Quickstart
+
+```bash
+# 1. Install all skills into your agent (Claude Code, Cursor, Codex, OpenCode, etc.)
+npx skills add psyduckler/aeo-skills
+
+# 2. Set your Gemini key (free from aistudio.google.com)
+export GEMINI_API_KEY="your_key_here"
+
+# 3. Ask your agent: "Use aeo-analytics-free to track AI visibility for tabiji.ai"
+```
+
+The skills.sh CLI works with [Claude Code, Cursor, Codex, OpenCode, and 50+ other agents](https://skills.sh/docs).
+
+### Alternative installs
+
+```bash
+# ClawHub (for OpenClaw agents)
+clawhub install psyduckler/aeo-analytics-free
+
+# Manual: clone and point your agent at the skill folders
+git clone https://github.com/psyduckler/aeo-skills
+```
+
+### Install a single skill
+
+```bash
+# Only install the analytics tracker (skills are self-contained)
+npx skills add psyduckler/aeo-skills --skill aeo-analytics-free
+```
+
+## What's coming in v2
+
+A streamlined six-skill suite (`aeo-init`, `aeo-baseline`, `aeo-track`, `aeo-report`, `aeo-optimize`, `aeo-schema`) plus a single public **evidence schema** (`schemas/aeo-evidence-v1.json`) and **methodology document** ([METHODOLOGY.md](METHODOLOGY.md)) that every skill reads from and writes to.
+
+The v1 skills below remain installable. v2 is being developed in parallel and will land on this branch as it stabilizes.
+
+---
 
 ## Why Gemini Is the Only Model That Matters for AEO (Right Now)
 
@@ -19,8 +57,8 @@ Gemini issued web searches on **every single response** and used **265 unique se
 **What this means:** Gemini's responses are deeply dependent on live web content — your content's presence (or absence) in search results directly determines whether Gemini cites you. ChatGPT mostly relies on its parametric knowledge and rarely searches, making it nearly impossible to influence through content optimization alone.
 
 **Why ChatGPT doesn't search much:**
-- **Cost** — Web search is expensive at ChatGPT's scale. Every search query adds latency and API costs. OpenAI has strong economic incentives to minimize search usage.
-- **Legal risk** — There are ongoing concerns about ChatGPT searching Google at scale. Google could restrict or litigate over systematic scraping of search results, so OpenAI keeps search usage conservative.
+- **Cost** — Web search is expensive at ChatGPT's scale. Every search query adds latency and API costs.
+- **Legal risk** — There are ongoing concerns about ChatGPT searching Google at scale.
 - **Architecture** — ChatGPT was designed as a parametric model first, with search as an optional enhancement. Gemini was built with Google Search as a native, always-on capability.
 
 ### A single 20-sample run captures 74–100% of query diversity
@@ -37,17 +75,13 @@ If you're doing AEO/GEO today, **focus on Gemini**. It's the model that:
 1. **Always searches the web** — your content can actually influence its responses
 2. **Powers Google AI Overviews** — the largest answer engine by traffic (25% of Google searches trigger AI Overviews)
 3. **Uses diverse search queries** — creating multiple pathways for your content to get discovered and cited
-4. **Is measurable** — the Gemini API with grounding lets you simulate exactly what the model does, so you can test and iterate
-
-ChatGPT's limited search behavior means traditional SEO and brand authority matter more for getting cited there. But Gemini? That's where content optimization has the most direct, measurable impact.
+4. **Is measurable** — the Gemini API with grounding lets you simulate exactly what the model does
 
 ---
 
 ## Understanding Sample Sizes and Confidence
 
-We default to 20 samples per prompt. Here's what that means statistically:
-
-### What 20 Samples Tells You
+We default to 20 samples per prompt. Here's what that means statistically (Wilson 95% CI):
 
 | Observed Rate | 95% Confidence Interval | Interpretation |
 |---------------|------------------------|----------------|
@@ -59,15 +93,11 @@ We default to 20 samples per prompt. Here's what that means statistically:
 
 ### When to Use More Samples
 
-- **20 samples (default):** Good for directional insights, initial audits, and identifying obvious gaps. Sufficient for most AEO work.
-- **50 samples:** Better precision for competitive analysis where small differences matter. Recommended for source authority profiling and competitor monitoring.
-- **100 samples:** High-confidence measurements for reporting to stakeholders or making content investment decisions. The control run study showed 100 samples captures 74-100% of the query universe.
+- **20 samples (default):** Directional insights, initial audits, identifying obvious gaps
+- **50 samples:** Competitive analysis where small differences matter (source authority, competitor monitoring)
+- **100 samples:** High-confidence measurements for stakeholder reporting
 
-### The Practical Reality
-
-For AEO, perfect precision isn't the goal — directional insight is. If your brand shows up 0/20 times for an important prompt, you have a problem regardless of confidence intervals. If you show up 15/20 times, you're winning. The edge cases (5-8/20) are where bumping to 50 samples helps clarify.
-
-All scripts accept `--runs N` to override the default.
+All scripts accept `--runs N` to override the default. See [METHODOLOGY.md](METHODOLOGY.md) for the full statistical reasoning.
 
 ---
 
@@ -79,9 +109,9 @@ The AEO loop: **Research → Create → Measure → Repeat**
 
 | Skill | Description | Link |
 |-------|-------------|------|
-| **aeo-prompt-research-free** | Discover which AI prompts matter for a brand. Crawls a site, analyzes positioning, generates prioritized prompts, and audits content coverage. No API keys required. | [→ Skill](./aeo-prompt-research-free/) |
-| **aeo-content-free** | Create or refresh content that AI assistants want to cite. Researches what models currently cite, builds a competitive brief, and produces citation-worthy content. No API keys required. | [→ Skill](./aeo-content-free/) |
-| **aeo-analytics-free** | Track whether AI assistants mention and cite a brand over time. Measures visibility, detects trends, and identifies opportunities. Uses Gemini API free tier with grounding. | [→ Skill](./aeo-analytics-free/) |
+| **aeo-prompt-research-free** | Discover which AI prompts matter for a brand. Crawls a site, analyzes positioning, generates prioritized prompts, audits content coverage. No API keys required. | [→ Skill](./aeo-prompt-research-free/) |
+| **aeo-content-free** | Create or refresh content that AI assistants want to cite. Researches what models currently cite, builds a competitive brief, produces citation-worthy content. No API keys required. | [→ Skill](./aeo-content-free/) |
+| **aeo-analytics-free** | Track whether AI assistants mention and cite a brand over time. Measures visibility, detects trends, identifies opportunities. Uses Gemini API free tier with grounding. | [→ Skill](./aeo-analytics-free/) |
 
 ### Analysis Tools
 
@@ -89,9 +119,9 @@ Understand how AI models search and what they cite.
 
 | Skill | Description | Link |
 |-------|-------------|------|
-| **prompt-frequency-analyzer** | Analyze which search queries Gemini triggers when answering a prompt. Runs it multiple times with Google Search grounding and reports frequency distribution. | [→ Skill](./prompt-frequency-analyzer/) |
-| **prompt-question-finder** | Find question-based Google Autocomplete suggestions for any topic. Prepends 13 question modifiers (what, how, why, will, are, do…) to discover what people actually ask. | [→ Skill](./prompt-question-finder/) |
-| **aeo-grounding-query-mapper** | Map the exact search queries Gemini fires — with query clustering, pattern analysis, batch mode, and cross-prompt overlap detection. Upgraded version of prompt-frequency-analyzer. | [→ Skill](./aeo-grounding-query-mapper/) |
+| **aeo-prompt-frequency-analyzer** | Analyze which search queries Gemini triggers when answering a prompt. Runs it multiple times with Google Search grounding and reports frequency distribution. | [→ Skill](./aeo-prompt-frequency-analyzer/) |
+| **aeo-prompt-question-finder** | Find question-based Google Autocomplete suggestions for any topic. Prepends 13 question modifiers (what, how, why, will, are, do…) to discover what people actually ask. | [→ Skill](./aeo-prompt-question-finder/) |
+| **aeo-grounding-query-mapper** | Map the exact search queries Gemini fires — with query clustering, pattern analysis, batch mode, and cross-prompt overlap detection. Upgraded version of aeo-prompt-frequency-analyzer. | [→ Skill](./aeo-grounding-query-mapper/) |
 
 ### Simulation & Monitoring
 
@@ -119,9 +149,11 @@ Deep analysis for competitive AEO.
 |-------|-------------|------|
 | **aeo-source-authority-profiler** | Analyze why certain sources get cited. Fetches top-cited pages and profiles them (word count, schema, freshness, entities) to build a "citation blueprint." | [→ Skill](./aeo-source-authority-profiler/) |
 | **aeo-cannibalization-detector** | Detect when your own pages compete against each other for the same AI prompts. Scores severity and recommends consolidation or differentiation. | [→ Skill](./aeo-cannibalization-detector/) |
-| **aeo-freshness-decay-tracker** | Track how citation rates change over time. Detects content decay, correlates with freshness, and flags pages needing urgent refresh. | [→ Skill](./aeo-freshness-decay-tracker/) |
+| **aeo-freshness-decay-tracker** | Track how citation rates change over time. Detects content decay, correlates with freshness, flags pages needing urgent refresh. | [→ Skill](./aeo-freshness-decay-tracker/) |
 | **aeo-entity-extractor** | Extract the specific entities (brands, people, stats, tools) that Gemini mentions in responses. Find entity gaps in your content. | [→ Skill](./aeo-entity-extractor/) |
 | **aeo-multi-prompt-strategy** | Find authority hub pages cited across multiple prompts. Optimize one page to win many prompts instead of building separate pages for each. | [→ Skill](./aeo-multi-prompt-strategy/) |
+
+---
 
 ## The AEO Loop
 
@@ -134,53 +166,74 @@ These skills form a complete AEO workflow:
 ```
 
 1. **Research** (`aeo-prompt-research-free`) — Find what questions people ask AI about your industry
-2. **Analyze** (`prompt-frequency-analyzer`, `aeo-grounding-query-mapper`, `prompt-question-finder`) — Understand how AI models search and what they cite
+2. **Analyze** (`aeo-prompt-frequency-analyzer`, `aeo-grounding-query-mapper`, `aeo-prompt-question-finder`) — Understand how AI models search and what they cite
 3. **Create** (`aeo-content-free`, `aeo-schema-optimizer`) — Write content and add structured data optimized for AI citations
 4. **Simulate** (`aeo-ai-overview-simulator`, `aeo-citation-gap-finder`) — Preview how your content performs in AI Overviews
-5. **Measure** (`aeo-analytics-free`, `aeo-competitor-monitor`, `aeo-freshness-decay-tracker`) — Track your visibility, competitors, and content decay over time
-6. **Profile** (`aeo-source-authority-profiler`, `aeo-entity-extractor`) — Understand WHY top sources get cited and what entities to include
+5. **Measure** (`aeo-analytics-free`, `aeo-competitor-monitor`, `aeo-freshness-decay-tracker`) — Track your visibility, competitors, content decay over time
+6. **Profile** (`aeo-source-authority-profiler`, `aeo-entity-extractor`) — Understand WHY top sources get cited
 7. **Strategize** (`aeo-multi-prompt-strategy`, `aeo-cannibalization-detector`) — Find authority hub opportunities and fix self-competition
-8. **Repeat** — Use strategy insights to prioritize research and content creation
+8. **Repeat** — Use insights to prioritize research and content creation
 
-## Usage
-
-Each skill has a `SKILL.md` with full instructions. Drop them into your agent's skills directory and they're ready to go.
-
-### OpenClaw
-
-```bash
-# Install via ClawHub
-clawhub install psyduckler/aeo-prompt-research-free
-clawhub install psyduckler/aeo-content-free
-clawhub install psyduckler/aeo-analytics-free
-clawhub install psyduckler/aeo-ai-overview-simulator
-clawhub install psyduckler/aeo-citation-gap-finder
-clawhub install psyduckler/aeo-grounding-query-mapper
-clawhub install psyduckler/aeo-competitor-monitor
-clawhub install psyduckler/aeo-schema-optimizer
-clawhub install psyduckler/aeo-source-authority-profiler
-clawhub install psyduckler/aeo-cannibalization-detector
-clawhub install psyduckler/aeo-freshness-decay-tracker
-clawhub install psyduckler/aeo-entity-extractor
-clawhub install psyduckler/aeo-multi-prompt-strategy
-```
-
-### Other Frameworks
-
-Each skill is a self-contained directory with:
-- `SKILL.md` — Instructions the agent follows (the "prompt")
-- `references/` — Supporting docs and templates
-- `scripts/` — Helper scripts (where applicable)
-
-Read the `SKILL.md` files to understand the methodology, then adapt to your agent's tool-calling conventions.
+---
 
 ## Requirements
 
-- `web_search` — Any web search tool (Brave, Google, etc.)
-- `web_fetch` — URL fetching / scraping capability
-- LLM reasoning — The agent's own model
+- **`npx`** (Node.js 18+) — for the [skills.sh](https://skills.sh) installer
+- **Python 3.9+** — most measurement skills are Python stdlib only (no `pip install` required)
 - **Gemini API key** (free from [aistudio.google.com](https://aistudio.google.com)) — Required for skills that use Gemini grounding (simulator, analyzers, monitors, analytics). Set as `GEMINI_API_KEY` env var.
-- **Brave Search API key** (optional) — Used by citation-gap-finder for web search comparison. Set as `BRAVE_API_KEY` env var.
+- **Brave Search API key** (optional) — Used by `aeo-citation-gap-finder` for web search comparison. Set as `BRAVE_API_KEY` env var.
+- **Web search + web fetch** — Provided by your agent (Claude Code, Cursor, etc.); used by no-API-key skills.
+
+---
+
+## Structure
+
+Each skill is a self-contained directory:
+
+```
+aeo-<skill-name>/
+├── SKILL.md         # Instructions the agent follows (the "prompt")
+├── references/      # Supporting docs and templates (optional)
+└── scripts/         # Helper scripts (where applicable)
+    ├── <main>.py
+    └── _shared.py   # Vendored Gemini client helpers (auto-synced)
+```
+
+The `_shared.py` in each skill is a vendored copy of common Gemini helpers. They are kept byte-identical via `tests/test_compile.py`; to update them all at once, run `scripts/sync-shared.sh`.
+
+---
+
+## Schemas (v2 preview)
+
+Public, versioned data schemas live in `schemas/`:
+
+- [`schemas/aeo-evidence-v1.json`](schemas/aeo-evidence-v1.json) — The output format every measurement skill writes. The moat.
+- [`schemas/aeo-config-v1.json`](schemas/aeo-config-v1.json) — Workspace configuration.
+- [`schemas/prompt-pack-v1.json`](schemas/prompt-pack-v1.json) — Vertical prompt pack format.
+
+See [METHODOLOGY.md](METHODOLOGY.md) for the retrieval framework, sampling rationale, and scoring formula.
+
+---
+
+## Tests
+
+```bash
+python3 tests/test_compile.py
+```
+
+Verifies that every script compiles, accepts `--help`, every skill vendors its own `_shared.py`, all vendored copies are byte-identical, and missing-key error handling is clean.
+
+---
+
+## Contributing
+
+Contributions welcome — especially:
+- New skills (see [CONTRIBUTING.md](CONTRIBUTING.md))
+- Vertical prompt packs (industry-specific prompt sets)
+- Additional provider adapters (OpenAI, Anthropic, Perplexity for v2)
+- Real-world example reports
+
+---
 
 ## License
 

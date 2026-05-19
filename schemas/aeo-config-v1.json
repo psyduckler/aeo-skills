@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/psyduckler/aeo-skills/schemas/aeo-config-v1.json",
+  "title": "AEO Config v1",
+  "description": "Workspace configuration for an AEO tracking project. Lives at ./aeo.config.json in the user's project directory. Written by aeo-init; read by every other skill.",
+  "type": "object",
+  "required": ["schema_version", "workspace", "providers", "prompts"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "aeo-config-v1"
+    },
+    "workspace": {
+      "type": "object",
+      "required": ["brand", "domain"],
+      "properties": {
+        "brand": {"type": "string", "minLength": 1},
+        "domain": {"type": "string", "minLength": 1},
+        "aliases": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "competitors": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "locale": {
+          "type": "string",
+          "description": "BCP 47 language tag (e.g. 'en-US')",
+          "default": "en-US"
+        },
+        "persona": {
+          "type": "string",
+          "description": "Optional persona prefix to prepend to prompts"
+        }
+      },
+      "additionalProperties": false
+    },
+    "providers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "model", "api_key_env"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": ["gemini", "openai", "anthropic", "perplexity"]
+          },
+          "model": {
+            "type": "string",
+            "description": "Provider-specific model identifier"
+          },
+          "api_key_env": {
+            "type": "string",
+            "description": "Environment variable holding the API key (e.g. GEMINI_API_KEY)",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "grounding": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable web grounding when supported by the provider"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "prompts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["prompt_id", "text"],
+        "properties": {
+          "prompt_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "text": {"type": "string", "minLength": 1},
+          "intent": {
+            "type": "string",
+            "enum": ["informational", "commercial", "navigational", "transactional", "comparison", "alternative", "research", "diagnostic", "other"]
+          },
+          "tags": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "enabled": {"type": "boolean", "default": true}
+        },
+        "additionalProperties": false
+      }
+    },
+    "sampling": {
+      "type": "object",
+      "properties": {
+        "default_runs": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 20
+        },
+        "concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 5
+        },
+        "retries_per_sample": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 3
+        }
+      },
+      "additionalProperties": false
+    },
+    "limits": {
+      "type": "object",
+      "description": "Spend controls — enforced before any provider call",
+      "properties": {
+        "max_daily_cost_usd": {
+          "type": "number",
+          "minimum": 0,
+          "default": 25
+        },
+        "max_runs_per_campaign": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 100
+        },
+        "confirm_over_usd": {
+          "type": "number",
+          "minimum": 0,
+          "default": 5,
+          "description": "Prompt the user to confirm before any single run estimated above this amount"
+        }
+      },
+      "additionalProperties": false
+    },
+    "scoring": {
+      "type": "object",
+      "properties": {
+        "methodology_version": {
+          "type": "string",
+          "pattern": "^aeo-v[0-9]+(\\.[0-9]+)?$",
+          "default": "aeo-v1"
+        }
+      },
+      "additionalProperties": false
+    },
+    "data_dir": {
+      "type": "string",
+      "default": "aeo-data",
+      "description": "Directory (relative to config file) where evidence files are written"
+    }
+  },
+  "additionalProperties": false
+}

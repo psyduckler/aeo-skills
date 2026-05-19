@@ -43,15 +43,13 @@ The "long long tail" of Gemini's search behavior means the model generates varie
 
 ```bash
 # Scan prompts and save to data file
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/track.py scan \
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/track.py scan \
     --domain acme.com \
     --prompts "best content optimization tools" "SEO content software" \
     --data-file freshness.json
 
 # With prompts from a file
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/track.py scan \
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/track.py scan \
     --domain acme.com \
     --prompts-file prompts.txt \
     --data-file freshness.json

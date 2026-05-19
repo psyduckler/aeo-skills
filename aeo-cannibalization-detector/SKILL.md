@@ -38,25 +38,21 @@ This matters because influence compounds through repeated inclusion in the **rec
 
 ```bash
 # Check two prompts for cannibalization
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/detect.py --domain acme.com \
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/detect.py --domain acme.com \
     "best content optimization tools" \
     "SEO content software"
 
 # Load prompts from a file
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/detect.py --domain acme.com --prompts-file prompts.txt
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/detect.py --domain acme.com --prompts-file prompts.txt
 
 # Both positional prompts and file, JSON output
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/detect.py --domain acme.com \
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/detect.py --domain acme.com \
     "content optimization" \
     --prompts-file more-prompts.txt \
     --output json
 
 # Higher confidence with more runs
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/detect.py --domain acme.com \
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/detect.py --domain acme.com \
     "best SEO tools" --runs 30
 ```
 

@@ -40,16 +40,13 @@ The "long long tail" of Gemini's varied search queries means entities that appea
 
 ```bash
 # Basic — extract entities from Gemini responses
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/extract_entities.py "best project management tools for startups"
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/extract_entities.py "best project management tools for startups"
 
 # With entity gap analysis for your domain
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/extract_entities.py "best project management tools for startups" --domain monday.com
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/extract_entities.py "best project management tools for startups" --domain monday.com
 
 # JSON output
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/extract_entities.py "best CRM software 2025" --output json
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/extract_entities.py "best CRM software 2025" --output json
 ```
 
 Run from the skill directory. Resolve `scripts/extract_entities.py` relative to this SKILL.md.

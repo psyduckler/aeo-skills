@@ -45,18 +45,15 @@ This skill identifies those gaps so you can optimize content for cross-platform 
 
 ```bash
 # Full gap analysis with domain tracking
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-BRAVE_API_KEY=$(security find-generic-password -s "brave-search" -w) \
-  python3 scripts/find_gaps.py "best SEO tools for content optimization" --domain acme.com
+GEMINI_API_KEY="$GEMINI_API_KEY" \
+BRAVE_API_KEY="$BRAVE_API_KEY" python3 scripts/find_gaps.py "best SEO tools for content optimization" --domain acme.com
 
 # Without Brave (Gemini-only analysis)
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-  python3 scripts/find_gaps.py "best SEO tools for content optimization" --domain acme.com
+GEMINI_API_KEY="$GEMINI_API_KEY" python3 scripts/find_gaps.py "best SEO tools for content optimization" --domain acme.com
 
 # JSON output
-GEMINI_API_KEY=$(security find-generic-password -s "google-api-key" -w) \
-BRAVE_API_KEY=$(security find-generic-password -s "brave-search" -w) \
-  python3 scripts/find_gaps.py "best SEO tools for content optimization" --domain acme.com --output json
+GEMINI_API_KEY="$GEMINI_API_KEY" \
+BRAVE_API_KEY="$BRAVE_API_KEY" python3 scripts/find_gaps.py "best SEO tools for content optimization" --domain acme.com --output json
 ```
 
 Run from the skill directory. Resolve `scripts/find_gaps.py` relative to this SKILL.md.

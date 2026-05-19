@@ -1,0 +1,79 @@
+name: tests
+
+on:
+  push:
+    branches: [main, v2-foundation, "v2-**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke-tests:
+    name: Smoke tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run smoke tests
+        run: python3 tests/test_compile.py
+
+  schema-validation:
+    name: Schema validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install jsonschema
+        run: python3 -m pip install --quiet jsonschema
+
+      - name: Validate every schema is valid JSON Schema
+        run: |
+          for schema in schemas/*.json; do
+            echo "Validating $schema"
+            python3 -c "
+          import json, sys
+          from jsonschema import Draft202012Validator
+          schema = json.load(open('$schema'))
+          Draft202012Validator.check_schema(schema)
+          print('  ok')
+          "
+          done
+
+  install-check:
+    name: skills.sh install check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: List discoverable skills via npx skills
+        run: |
+          # Verify that npx skills can find every skill in this repo
+          # (Catches frontmatter / folder name / SKILL.md issues)
+          npx -y skills@latest add ./. --list 2>&1 | tee /tmp/skills-list.txt
+          # Confirm we got at least 14 skills (current count is 15)
+          # Look for the "Found N skills" line emitted by the CLI
+          if ! grep -E "Found [0-9]+ skills" /tmp/skills-list.txt; then
+            echo "::error::skills.sh CLI did not discover any skills"
+            exit 1
+          fi
+          # Extract the count and verify it's >= 14
+          count=$(grep -oE "Found [0-9]+ skills" /tmp/skills-list.txt | grep -oE "[0-9]+" | head -1)
+          if [ "$count" -lt 14 ]; then
+            echo "::error::Expected at least 14 skills, found $count"
+            exit 1
+          fi
+          echo "Discovered $count skills"

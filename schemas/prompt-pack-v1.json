@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/psyduckler/aeo-skills/schemas/prompt-pack-v1.json",
+  "title": "Prompt Pack v1",
+  "description": "Format for vertical prompt packs (e.g. b2b-saas, local-services, ai-tools). Packs are installable skill add-ons that populate an aeo.config.json with curated prompts for a specific industry.",
+  "type": "object",
+  "required": ["schema_version", "pack", "prompts"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "prompt-pack-v1"
+    },
+    "pack": {
+      "type": "object",
+      "required": ["name", "version", "description"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "description": "Pack identifier — kebab-case, e.g. 'b2b-saas'"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "description": "SemVer string"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {"type": "string"},
+        "license": {
+          "type": "string",
+          "default": "MIT"
+        },
+        "homepage": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false
+    },
+    "intents": {
+      "type": "array",
+      "description": "List of intent categories the pack covers",
+      "items": {
+        "type": "string",
+        "enum": ["informational", "commercial", "navigational", "transactional", "comparison", "alternative", "research", "diagnostic", "category_discovery", "vendor_comparison", "alternatives", "pricing", "integration", "trust", "problem_solution", "other"]
+      },
+      "uniqueItems": true
+    },
+    "variables": {
+      "type": "object",
+      "description": "Template variables the user must provide to instantiate the pack (e.g. {problem, vendor, category})",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["description"],
+        "properties": {
+          "description": {"type": "string"},
+          "example": {"type": "string"},
+          "required": {"type": "boolean", "default": true}
+        },
+        "additionalProperties": false
+      }
+    },
+    "prompts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["prompt_id", "text"],
+        "properties": {
+          "prompt_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Prompt template. May contain {{variable}} placeholders."
+          },
+          "intent": {
+            "type": "string",
+            "enum": ["informational", "commercial", "navigational", "transactional", "comparison", "alternative", "research", "diagnostic", "category_discovery", "vendor_comparison", "alternatives", "pricing", "integration", "trust", "problem_solution", "other"]
+          },
+          "variables": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Names of variables referenced in this prompt's text"
+          },
+          "tags": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
