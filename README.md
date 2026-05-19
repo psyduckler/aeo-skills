@@ -112,6 +112,7 @@ The streamlined v2 measurement core. Built against [`schemas/aeo-evidence-v1.jso
 | **aeo-init** | Initialize an AEO workspace. Interactive or flag-driven, generates a schema-conforming `aeo.config.json` with brand, competitors, prompts, providers, sampling, and spend limits. Never calls an API. | [→ Skill](./aeo-init/) |
 | **aeo-baseline** | Atomic AI visibility measurement. Runs each configured prompt 20× against Gemini with grounding, extracts every signal (mentions, citations, position, query fan-out, entities, sentiment, competitors) from the same 20 responses, computes Wilson 95% CIs, and writes one append-only JSON evidence file. Built-in `--doctor` and `--estimate-cost` modes; honors spend caps. | [→ Skill](./aeo-baseline/) |
 | **aeo-track** | Schedule recurring `aeo-baseline` runs. Generates a launchd plist (macOS) or crontab entry (Linux) plus a wrapper script that loads `.env` and invokes baseline. Dry-run by default; `--apply` installs. Idempotent install/remove with per-workspace state. | [→ Skill](./aeo-track/) |
+| **aeo-report** | Read accumulated `aeo-data/*.json` and produce a visibility trend report: Markdown + single-file HTML with embedded SVG line charts. Surfaces decay (declining citation rate), cannibalization (multiple owned URLs competing), hub-page opportunities (one URL across many prompts), and competitor share shifts. Pure analysis — no API calls. | [→ Skill](./aeo-report/) |
 
 ### Core Pipeline (v1)
 
