@@ -89,6 +89,31 @@ jobs:
           sys.exit(1 if had_errors else 0)
           PY
 
+      - name: Validate prompt packs against prompt-pack-v1
+        run: |
+          python3 - <<'PY'
+          import glob, json, sys
+          from jsonschema import Draft202012Validator
+          schema = json.load(open('schemas/prompt-pack-v1.json'))
+          validator = Draft202012Validator(schema)
+          packs = glob.glob('aeo-pack-*/prompts.json')
+          if not packs:
+              print('No prompt packs found — nothing to validate')
+              sys.exit(0)
+          had_errors = False
+          for path in packs:
+              instance = json.load(open(path))
+              errors = list(validator.iter_errors(instance))
+              if errors:
+                  had_errors = True
+                  print(f'✗ {path}')
+                  for e in errors:
+                      print(f'    {".".join(str(x) for x in e.absolute_path)}: {e.message}')
+              else:
+                  print(f'✓ {path}')
+          sys.exit(1 if had_errors else 0)
+          PY
+
       - name: Verify visibility scores match component contributions
         run: |
           python3 - <<'PY'

@@ -116,6 +116,16 @@ The streamlined v2 measurement core. Built against [`schemas/aeo-evidence-v1.jso
 | **aeo-optimize** | Turn a baseline into a concrete content work queue. Reads the latest evidence + (optionally) the report and produces prioritized Markdown tasks, each backed by specific prompts and metrics: refresh URL X, create comparison page A vs B, add JSON-LD type Z. SKILL.md-only — agent reasons over the methodology, no script. | [→ Skill](./aeo-optimize/) |
 | **aeo-schema** | Generate JSON-LD structured data optimized for AI citation. Templates for Article, FAQ, HowTo, Product, LocalBusiness, BreadcrumbList. SKILL.md-only. Renamed from v1 `aeo-schema-optimizer`. | [→ Skill](./aeo-schema/) |
 
+### Prompt Packs (vertical starter sets)
+
+Installable mini-skills with curated prompts for specific industries. After installing a pack, the agent (or you) merges its prompts into `aeo.config.json` — variables filled per workspace.
+
+| Pack | Description | Link |
+|---|---|---|
+| **aeo-pack-b2b-saas** | 20 prompts: category discovery, vendor comparison, alternatives, pricing, integration, trust signals. Variables: `category`, `problem`, `vendor`, `integration`, `company_size`. | [→ Pack](./aeo-pack-b2b-saas/) |
+| **aeo-pack-local-services** | 16 prompts for local service businesses (plumbers, dentists, lawyers, restaurants). Variables: `service`, `city`, `specialty`, `neighborhood`. | [→ Pack](./aeo-pack-local-services/) |
+| **aeo-pack-ai-tools** | 17 prompts for AI tool brands. Covers incumbent comparison (ChatGPT, Claude), hallucination/accuracy framing, vertical positioning. Variables: `task`, `competitor`, `use_case`, `domain`. | [→ Pack](./aeo-pack-ai-tools/) |
+
 ### Core Pipeline (v1)
 
 The AEO loop: **Research → Create → Measure → Repeat**

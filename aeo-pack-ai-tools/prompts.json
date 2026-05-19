@@ -1,0 +1,161 @@
+{
+  "schema_version": "prompt-pack-v1",
+  "pack": {
+    "name": "ai-tools",
+    "version": "1.0.0",
+    "description": "Prompt set for AI-tool brands tracking their visibility in AI answer engines. Covers AI task discovery, alternatives to incumbents, free-vs-paid framing, accuracy claims, and use-case fit.",
+    "author": "psyduckler",
+    "license": "MIT",
+    "homepage": "https://github.com/psyduckler/aeo-skills/tree/main/aeo-pack-ai-tools"
+  },
+  "intents": [
+    "category_discovery",
+    "alternatives",
+    "research",
+    "comparison",
+    "trust"
+  ],
+  "variables": {
+    "task": {
+      "description": "The AI task / capability your tool does",
+      "example": "content writing",
+      "required": true
+    },
+    "competitor": {
+      "description": "A major incumbent in your space",
+      "example": "ChatGPT",
+      "required": false
+    },
+    "use_case": {
+      "description": "A specific user use case",
+      "example": "long-form blog posts",
+      "required": false
+    },
+    "domain": {
+      "description": "Industry or professional domain (legal, medical, finance, etc.)",
+      "example": "legal",
+      "required": false
+    }
+  },
+  "prompts": [
+    {
+      "prompt_id": "best_ai_tools_for_task",
+      "text": "Best AI tools for {{task}}",
+      "intent": "category_discovery",
+      "variables": ["task"],
+      "tags": ["category"]
+    },
+    {
+      "prompt_id": "top_ai_task_platforms",
+      "text": "Top AI {{task}} platforms in 2026",
+      "intent": "category_discovery",
+      "variables": ["task"],
+      "tags": ["category"]
+    },
+    {
+      "prompt_id": "competitor_alternatives",
+      "text": "{{competitor}} alternatives for {{task}}",
+      "intent": "alternatives",
+      "variables": ["competitor", "task"],
+      "tags": ["alternatives"]
+    },
+    {
+      "prompt_id": "free_ai_tools_for_task",
+      "text": "Free AI tools for {{task}}",
+      "intent": "category_discovery",
+      "variables": ["task"],
+      "tags": ["pricing"]
+    },
+    {
+      "prompt_id": "free_vs_paid_ai_for_task",
+      "text": "Free vs paid AI tools for {{task}}",
+      "intent": "comparison",
+      "variables": ["task"],
+      "tags": ["pricing", "comparison"]
+    },
+    {
+      "prompt_id": "most_accurate_ai_for_task",
+      "text": "Most accurate AI {{task}} tool",
+      "intent": "trust",
+      "variables": ["task"],
+      "tags": ["accuracy", "trust"]
+    },
+    {
+      "prompt_id": "ai_for_specific_use_case",
+      "text": "Best AI for {{use_case}}",
+      "intent": "category_discovery",
+      "variables": ["use_case"],
+      "tags": ["use-case"]
+    },
+    {
+      "prompt_id": "ai_tools_for_domain",
+      "text": "AI tools for {{domain}} professionals",
+      "intent": "category_discovery",
+      "variables": ["domain"],
+      "tags": ["vertical"]
+    },
+    {
+      "prompt_id": "competitor_vs_alternatives",
+      "text": "{{competitor}} vs the best alternatives",
+      "intent": "comparison",
+      "variables": ["competitor"],
+      "tags": ["comparison"]
+    },
+    {
+      "prompt_id": "ai_api_for_task",
+      "text": "Best AI API for {{task}}",
+      "intent": "category_discovery",
+      "variables": ["task"],
+      "tags": ["api", "developer"]
+    },
+    {
+      "prompt_id": "open_source_ai_for_task",
+      "text": "Open-source AI alternatives for {{task}}",
+      "intent": "alternatives",
+      "variables": ["task"],
+      "tags": ["open-source"]
+    },
+    {
+      "prompt_id": "ai_privacy_for_task",
+      "text": "Privacy-focused AI tools for {{task}}",
+      "intent": "trust",
+      "variables": ["task"],
+      "tags": ["privacy", "trust"]
+    },
+    {
+      "prompt_id": "ai_pricing_for_task",
+      "text": "AI {{task}} pricing comparison",
+      "intent": "research",
+      "variables": ["task"],
+      "tags": ["pricing"]
+    },
+    {
+      "prompt_id": "how_to_evaluate_ai_for_task",
+      "text": "How to evaluate AI {{task}} tools",
+      "intent": "research",
+      "variables": ["task"],
+      "tags": ["evaluation"]
+    },
+    {
+      "prompt_id": "ai_for_enterprise_task",
+      "text": "Enterprise AI tools for {{task}}",
+      "intent": "category_discovery",
+      "variables": ["task"],
+      "tags": ["enterprise"]
+    },
+    {
+      "prompt_id": "ai_with_human_review_task",
+      "text": "AI {{task}} tools with human-in-the-loop review",
+      "intent": "trust",
+      "variables": ["task"],
+      "tags": ["quality", "trust"]
+    },
+    {
+      "prompt_id": "ai_no_hallucination_task",
+      "text": "AI {{task}} tools that don't hallucinate",
+      "intent": "trust",
+      "variables": ["task"],
+      "tags": ["accuracy", "trust"]
+    }
+  ]
+}
